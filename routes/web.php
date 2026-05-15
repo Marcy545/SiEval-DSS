@@ -1,38 +1,43 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PetaBanjirController;
 
 /*
 |--------------------------------------------------------------------------
-| AUTH
+| Public & Guest Routes
 |--------------------------------------------------------------------------
 */
+Route::get('/', function () {
+    return view('landing');
+});
 
-Route::get('/', [AuthController::class, 'showLogin']);
-
-Route::get('/login', [AuthController::class, 'showLogin'])
-    ->name('login');
-
-Route::post('/login', [AuthController::class, 'login']);
-
-Route::get('/register', [AuthController::class, 'showRegister'])
-    ->name('register');
-
-Route::post('/register', [AuthController::class, 'register']);
-
-Route::post('/logout', [AuthController::class, 'logout'])
-    ->name('logout');
+Route::middleware(['guest'])->group(function () {
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 /*
 |--------------------------------------------------------------------------
-| DASHBOARD
+| Protected Routes (Harus Login)
 |--------------------------------------------------------------------------
 */
+Route::middleware(['auth'])->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', [DashboardController::class, 'dashboard'])
-    ->name('dashboard');
+    // Group untuk RW / Kecamatan
+    Route::middleware(['checkRole:rw'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/history', [DashboardController::class, 'history'])->name('history');
+        Route::get('/rw/peta-banjir', [PetaBanjirController::class, 'indexRW'])->name('peta');
+    });
 
-Route::get('/history', [DashboardController::class, 'history'])
-    ->name('history');
+    // Group untuk Warga
+    Route::middleware(['checkRole:warga'])->group(function () {
+        Route::get('/peta-banjir', [PetaBanjirController::class, 'indexWarga'])->name('warga.peta');
+    });
+});

@@ -6,9 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+<<<<<<< HEAD
     /**
      * Run the migrations.
      */
+=======
+>>>>>>> master
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
@@ -24,12 +27,19 @@ return new class extends Migration
             $table->rememberToken();
 
             $table->timestamps();
+<<<<<<< HEAD
         });
     }
 
     /**
      * Reverse the migrations.
      */
+=======
+
+        });
+    }
+
+>>>>>>> master
     public function down(): void
     {
         Schema::dropIfExists('users');

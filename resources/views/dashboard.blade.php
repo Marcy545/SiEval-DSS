@@ -8,6 +8,11 @@
     @vite(['resources/css/app.css'])
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<<<<<<< HEAD
+=======
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+>>>>>>> master
 </head>
 
 <body class="bg-[#f5f6fa]" style="font-family: 'Inter', sans-serif;">
@@ -18,6 +23,7 @@
     <aside class="w-[260px] bg-white border-r border-gray-200 flex flex-col justify-between">
 
         <div>
+<<<<<<< HEAD
 
             <!-- Logo -->
             <div class="px-8 py-7 border-b border-gray-100">
@@ -53,6 +59,34 @@
 
             </div>
 
+=======
+            <!-- Logo -->
+            <div class="px-8 py-7 border-b border-gray-100">
+                <h1 class="text-2xl font-extrabold">SiEval DSS</h1>
+                <p class="text-sm text-gray-500 mt-1">Kecamatan Bojongsoang</p>
+            </div>
+
+            <!-- Menu -->
+            <nav class="px-4 space-y-2">
+                <!-- Menu Dashboard -->
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 p-3 {{ request()->is('dashboard') ? 'bg-blue-50 text-gray-500 font-bold' : 'text-gray-500' }} rounded-xl transition">
+                    <i data-lucide="layout-grid" class="w-5 h-5"></i>
+                    <span class="text-large">Dashboard</span>
+                </a>
+
+                <!-- Menu Peta Sebaran Banjir -->
+                <a href="{{ route('peta') }}" class="flex items-center gap-3 p-3 {{ request()->is('rw/peta-banjir') ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-500' }} hover:bg-gray-50 rounded-xl transition">
+                    <i data-lucide="map" class="w-5 h-5"></i>
+                    <span class="text-large">Peta Sebaran Banjir</span>
+                </a>
+
+                <!-- Menu Histori Banjir -->
+                <a href="{{ route('history') }}" class="flex items-center gap-3 p-3 {{ request()->is('history') ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-500' }} hover:bg-gray-50 rounded-xl transition">
+                    <i data-lucide="history" class="w-5 h-5"></i>
+                    <span class="text-large">Histori Banjir</span>
+                </a>
+            </nav>
+>>>>>>> master
         </div>
 
         <!-- User -->
@@ -273,5 +307,12 @@
 
 </div>
 
+<<<<<<< HEAD
+=======
+<script>
+    lucide.createIcons();
+</script>
+
+>>>>>>> master
 </body>
 </html>
