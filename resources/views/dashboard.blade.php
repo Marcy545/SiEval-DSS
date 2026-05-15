@@ -8,8 +8,11 @@
     @vite(['resources/css/app.css'])
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<<<<<<< HEAD
+=======
 
     <script src="https://unpkg.com/lucide@latest"></script>
+>>>>>>> master
 </head>
 
 <body class="bg-[#f5f6fa]" style="font-family: 'Inter', sans-serif;">
@@ -20,6 +23,43 @@
     <aside class="w-[260px] bg-white border-r border-gray-200 flex flex-col justify-between">
 
         <div>
+<<<<<<< HEAD
+
+            <!-- Logo -->
+            <div class="px-8 py-7 border-b border-gray-100">
+
+                <h1 class="text-2xl font-extrabold">
+                    SiEval DSS
+                </h1>
+
+                <p class="text-sm text-gray-500 mt-1">
+                    Kecamatan Bojongsoang
+                </p>
+
+            </div>
+
+            <!-- Menu -->
+            <div class="px-5 mt-8 space-y-3">
+
+                <a href="#" class="flex items-center gap-3 bg-gray-100 px-5 py-4 rounded-2xl font-semibold text-black">
+                    Dashboard
+                </a>
+
+                <a href="#" class="flex items-center gap-3 px-5 py-4 rounded-2xl text-gray-500 hover:bg-gray-100">
+                    Peta Sebaran Banjir
+                </a>
+
+                <a
+                    href="{{ route('history') }}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition"
+                >
+                    <i data-lucide="history" class="w-5 h-5"></i>
+                    <span>Histori Banjir</span> 
+                </a>
+
+            </div>
+
+=======
             <!-- Logo -->
             <div class="px-8 py-7 border-b border-gray-100">
                 <h1 class="text-2xl font-extrabold">SiEval DSS</h1>
@@ -46,6 +86,7 @@
                     <span class="text-large">Histori Banjir</span>
                 </a>
             </nav>
+>>>>>>> master
         </div>
 
         <!-- User -->
@@ -266,9 +307,12 @@
 
 </div>
 
+<<<<<<< HEAD
+=======
 <script>
     lucide.createIcons();
 </script>
 
+>>>>>>> master
 </body>
 </html>

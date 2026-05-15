@@ -13,28 +13,87 @@
 </head>
 
 <body
+<<<<<<< HEAD
+    class="min-h-screen flex items-center justify-center bg-cover bg-center"
+=======
     class="min-h-screen flex items-center justify-center bg-cover bg-center px-5"
+>>>>>>> master
     style="
         font-family: 'Inter', sans-serif;
         background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop');
     "
 >
 
+<<<<<<< HEAD
+<div class="w-full max-w-2xl bg-white rounded-[28px] shadow-2xl px-12 py-10">
+=======
 <div class="w-full max-w-3xl bg-white rounded-[32px] shadow-2xl px-14 py-12">
+>>>>>>> master
 
     <!-- Heading -->
     <div class="text-center">
 
+<<<<<<< HEAD
+        <h1 class="text-[42px] font-extrabold text-[#111827]">
+            Selamat Datang Kembali di SiEval DSS!
+        </h1>
+
+        <p class="text-gray-500 mt-3 text-[15px]">
+=======
         <h1 class="text-[44px] leading-tight font-extrabold text-[#111827]">
             Selamat Datang Kembali di SiEval DSS!
         </h1>
 
         <p class="text-gray-500 mt-4 text-[15px]">
+>>>>>>> master
             Masuk untuk memantau data banjir secara real-time di Bojongsoang.
         </p>
 
     </div>
 
+<<<<<<< HEAD
+    <!-- Success -->
+    @if(session('success'))
+
+    <div class="bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-2xl mt-6 text-sm">
+
+        {{ session('success') }}
+
+    </div>
+
+    @endif
+
+    <!-- Error -->
+    @if(session('error'))
+
+    <div class="bg-red-100 border border-red-300 text-red-600 px-4 py-3 rounded-2xl mt-6 text-sm">
+
+        {{ session('error') }}
+
+    </div>
+
+    @endif
+
+    <!-- Form -->
+    <form action="/login" method="POST" class="space-y-6 mt-8">
+
+        @csrf
+
+        <!-- Email -->
+        <div>
+
+            <label class="block text-sm font-semibold text-gray-700 mb-3">
+                Email<span class="text-red-500">*</span>
+            </label>
+
+            <div class="relative">
+
+                <i
+                    data-lucide="mail"
+                    class="absolute left-4 top-4 w-5 h-5 text-gray-400"
+                ></i>
+
+=======
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-full mb-6 text-sm text-center">
             {{ session('success') }}
@@ -74,6 +133,7 @@
             </label>
             <div class="relative">
                 <i data-lucide="mail" class="absolute left-4 top-4 w-5 h-5 text-gray-400"></i>
+>>>>>>> master
                 <input
                     type="email"
                     name="email"
@@ -81,7 +141,13 @@
                     class="w-full border border-gray-300 rounded-full py-4 pl-12 pr-5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                 >
+<<<<<<< HEAD
+
             </div>
+
+=======
+            </div>
+>>>>>>> master
         </div>
 
         <!-- Password -->
@@ -112,19 +178,27 @@
                     onclick="togglePassword()"
                     class="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
                 >
+<<<<<<< HEAD
+=======
 
+>>>>>>> master
                     <i
                         id="eyeIcon"
                         data-lucide="eye-off"
                         class="w-5 h-5"
                     ></i>
+<<<<<<< HEAD
+=======
 
+>>>>>>> master
                 </button>
 
             </div>
 
         </div>
 
+<<<<<<< HEAD
+=======
         <!-- Remember -->
         <div class="flex items-center justify-between pt-1">
 
@@ -148,6 +222,7 @@
 
         </div>
 
+>>>>>>> master
         <!-- Button -->
         <button
             type="submit"
@@ -175,6 +250,25 @@
 </div>
 
 <script>
+<<<<<<< HEAD
+
+    lucide.createIcons();
+
+    function togglePassword() {
+
+        const password = document.getElementById('password');
+
+        if (password.type === 'password') {
+
+            password.type = 'text';
+
+        } else {
+
+            password.type = 'password';
+        }
+    }
+
+=======
     lucide.createIcons();
 
     function togglePassword() {
@@ -210,6 +304,7 @@
             roleText.innerText = '(Pengurus RW)';
         }
     }
+>>>>>>> master
 </script>
 
 </body>
