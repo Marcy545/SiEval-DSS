@@ -13,32 +13,46 @@
 </head>
 
 <body
-    class="min-h-screen flex items-center justify-center bg-cover bg-center px-5"
+    class="min-h-screen flex items-center justify-center bg-cover bg-center"
     style="
         font-family: 'Inter', sans-serif;
         background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop');
     "
 >
 
-<div class="w-full max-w-3xl bg-white rounded-[32px] shadow-2xl px-14 py-12">
+<div class="w-full max-w-2xl bg-white rounded-[28px] shadow-2xl px-12 py-10">
 
     <!-- Heading -->
     <div class="text-center">
 
-        <h1 class="text-[44px] leading-tight font-extrabold text-[#111827]">
+        <h1 class="text-[42px] font-extrabold text-[#111827]">
             Selamat Datang Kembali di SiEval DSS!
         </h1>
 
-        <p class="text-gray-500 mt-4 text-[15px]">
+        <p class="text-gray-500 mt-3 text-[15px]">
             Masuk untuk memantau data banjir secara real-time di Bojongsoang.
         </p>
 
     </div>
 
+    <!-- Success -->
+    @if(session('success'))
+
+    <div class="bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-2xl mt-6 text-sm">
+
+        {{ session('success') }}
+
+    </div>
+
+    @endif
+
+    <!-- Error -->
     @if(session('error'))
 
-    <div class="bg-red-100 text-red-600 px-4 py-3 rounded-2xl text-sm mt-8">
+    <div class="bg-red-100 border border-red-300 text-red-600 px-4 py-3 rounded-2xl mt-6 text-sm">
+
         {{ session('error') }}
+
     </div>
 
     @endif
@@ -52,7 +66,7 @@
         <div>
 
             <label class="block text-sm font-semibold text-gray-700 mb-3">
-                Email (Boleh Email Pribadi)<span class="text-red-500">*</span>
+                Email<span class="text-red-500">*</span>
             </label>
 
             <div class="relative">
@@ -102,39 +116,14 @@
                     onclick="togglePassword()"
                     class="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
                 >
-
                     <i
                         id="eyeIcon"
                         data-lucide="eye-off"
                         class="w-5 h-5"
                     ></i>
-
                 </button>
 
             </div>
-
-        </div>
-
-        <!-- Remember -->
-        <div class="flex items-center justify-between pt-1">
-
-            <label class="flex items-center gap-3 text-sm text-gray-600">
-
-                <input
-                    type="checkbox"
-                    class="rounded border-gray-300"
-                >
-
-                Remember me
-
-            </label>
-
-            <a
-                href="#"
-                class="text-sm text-gray-500 hover:text-black"
-            >
-                Forgot Password?
-            </a>
 
         </div>
 
@@ -165,6 +154,7 @@
 </div>
 
 <script>
+
     lucide.createIcons();
 
     function togglePassword() {
@@ -172,11 +162,15 @@
         const password = document.getElementById('password');
 
         if (password.type === 'password') {
+
             password.type = 'text';
+
         } else {
+
             password.type = 'password';
         }
     }
+
 </script>
 
 </body>
