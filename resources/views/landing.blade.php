@@ -10,7 +10,6 @@
 </head>
 <body class="font-['Inter'] antialiased bg-white text-slate-900">
 
-    <!-- Navbar -->
     <nav class="flex items-center justify-between px-10 py-5 bg-white border-b border-gray-100 sticky top-0 z-50">
         <div class="flex items-center gap-2">
             <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center">
@@ -19,12 +18,11 @@
             <span class="font-bold text-xl tracking-tight">SiEval DSS</span>
         </div>
         <div class="flex items-center gap-3">
-            <button onclick="openModal('login')" class="px-6 py-2 text-sm font-semibold border border-gray-300 rounded-full hover:bg-gray-50">Masuk</button>
-            <button onclick="openModal('register')" class="px-6 py-2 text-sm font-semibold bg-black text-white rounded-full hover:bg-gray-800">Daftar</button>
+            <button onclick="openModal('login')" class="px-6 py-2 text-sm font-semibold border border-gray-300 rounded-full hover:bg-gray-50 transition">Masuk</button>
+            <button onclick="openModal('register')" class="px-6 py-2 text-sm font-semibold bg-black text-white rounded-full hover:bg-gray-800 transition">Daftar</button>
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="bg-[#111827] pt-20 pb-10 px-6 text-center text-white relative overflow-hidden">
         <div class="max-w-4xl mx-auto relative z-10">
             <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
@@ -34,18 +32,16 @@
                 SiEval DSS menghubungkan laporan warga langsung ke dashboard kecamatan secara real-time. Rekomendasi AI yang transparan memastikan setiap bantuan jatuh ke tangan yang paling membutuhkan.
             </p>
             <div class="flex flex-col md:flex-row justify-center gap-4 mb-16">
-                <a href="{{ route('register') }}" class="px-8 py-3 bg-transparent border border-gray-600 rounded-full font-semibold hover:bg-gray-800 transition">Laporan Banjir (Warga)</a>
-                <a href="{{ route('login') }}" class="px-8 py-3 bg-white text-black rounded-full font-semibold hover:bg-gray-100 transition">Lihat Dashboard (Kecamatan)</a>
+                <a href="/register" class="px-8 py-3 bg-transparent border border-gray-600 rounded-full font-semibold hover:bg-gray-800 transition">Laporan Banjir (Warga)</a>
+                <a href="/login?role=kecamatan" class="px-8 py-3 bg-white text-black rounded-full font-semibold hover:bg-gray-100 transition">Lihat Dashboard (Kecamatan)</a>
             </div>
         </div>
         
-        <!-- Mockup Preview (Sesuai image_9c7223.png) -->
         <div class="max-w-6xl mx-auto mt-10 rounded-t-3xl border-x border-t border-gray-700 bg-gray-900/50 p-4 shadow-2xl">
             <img src="{{ asset('images/dashboard-preview.png') }}" alt="SiEval Dashboard Preview" class="rounded-t-2xl w-full shadow-lg">
         </div>
     </section>
 
-    <!-- Workflow Section -->
     <section class="py-24 px-10 max-w-7xl mx-auto">
         <div class="grid md:grid-cols-2 gap-16 items-center">
             <div>
@@ -78,7 +74,6 @@
         </div>
     </section>
 
-    <!-- Features Grid -->
     <section class="py-24 bg-gray-50 px-10">
         <div class="max-w-7xl mx-auto">
             <h2 class="text-3xl font-extrabold text-center mb-16">Fitur Utama SiEval DSS</h2>
@@ -104,17 +99,15 @@
         </div>
     </section>
 
-    <!-- Call to Action -->
     <section class="mx-10 my-20 bg-[#111827] rounded-[40px] py-20 px-6 text-center text-white">
         <h2 class="text-4xl font-extrabold mb-4">Siap Menggunakan SiEval DSS?</h2>
         <p class="text-gray-400 mb-10">Gratis untuk pemerintah dan warga desa Bojongsoang. Setup selesai dalam 1-2 hari kerja.</p>
         <div class="flex flex-col md:flex-row justify-center gap-4">
-            <a href="#" class="px-8 py-3 border border-gray-600 rounded-full font-semibold">Laporan Banjir (Warga)</a>
-            <a href="#" class="px-8 py-3 bg-white text-black rounded-full font-semibold">Lihat Dashboard (Kecamatan)</a>
+            <a href="/register" class="px-8 py-3 border border-gray-600 hover:bg-gray-800 transition rounded-full font-semibold">Laporan Banjir (Warga)</a>
+            <a href="/login?role=kecamatan" class="px-8 py-3 bg-white text-black hover:bg-gray-200 transition rounded-full font-semibold">Lihat Dashboard (Kecamatan)</a>
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="px-10 py-16 border-t border-gray-100 text-sm">
         <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
             <div class="col-span-2">
@@ -127,15 +120,15 @@
             <div>
                 <h5 class="font-bold mb-6">Home</h5>
                 <ul class="text-gray-500 space-y-4">
-                    <li><a href="#">Header</a></li>
-                    <li><a href="#">Get Started</a></li>
+                    <li><a href="#" class="hover:text-black">Header</a></li>
+                    <li><a href="#" class="hover:text-black">Get Started</a></li>
                 </ul>
             </div>
             <div>
                 <h5 class="font-bold mb-6">Tentang</h5>
                 <ul class="text-gray-500 space-y-4">
-                    <li><a href="#">Cara kerja</a></li>
-                    <li><a href="#">Mengapa kami</a></li>
+                    <li><a href="#" class="hover:text-black">Cara kerja</a></li>
+                    <li><a href="#" class="hover:text-black">Mengapa kami</a></li>
                 </ul>
             </div>
         </div>
@@ -144,40 +137,32 @@
         </div>
     </footer>
 
-    <!-- Modal Overlay -->
     <div id="authModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
         
-        <!-- Modal Content -->
         <div class="bg-white w-full max-w-2xl rounded-[32px] p-10 relative shadow-2xl animate-in fade-in zoom-in duration-300">
             
-            <!-- Close Button -->
             <button onclick="closeModal()" class="absolute right-8 top-8 text-gray-400 hover:text-black">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
 
-            <!-- Dynamic Title -->
             <h2 id="modalTitle" class="text-2xl font-bold mb-8 text-[#111827]">Masuk ke SiEval DSS sebagai:</h2>
 
-            <!-- Role Selection Grid -->
             <div class="grid md:grid-cols-2 gap-6">
                 
-                <!-- Option: Warga (RW) -->
                 <a href="#" id="linkWarga" class="group border border-gray-100 rounded-2xl p-6 hover:border-blue-500 hover:bg-blue-50/50 transition-all duration-200 relative overflow-hidden">
                     <div class="relative z-10">
                         <h3 class="font-bold text-lg mb-2 group-hover:text-blue-600">Warga (RW)</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed">
+                        <p id="descWarga" class="text-gray-500 text-sm leading-relaxed">
                             Laporkan data banjir di wilayah Anda untuk memudahkan pendataan
                         </p>
                     </div>
-                    <!-- Dekorasi Icon Samar di Background (Sesuai Gambar) -->
                     <i data-lucide="home" class="absolute -right-2 -bottom-2 w-20 h-20 text-gray-50 group-hover:text-blue-100/50 transition-colors"></i>
                 </a>
 
-                <!-- Option: Kecamatan -->
                 <a href="#" id="linkKecamatan" class="group border border-gray-100 rounded-2xl p-6 hover:border-blue-500 hover:bg-blue-50/50 transition-all duration-200 relative overflow-hidden">
                     <div class="relative z-10">
                         <h3 class="font-bold text-lg mb-2 group-hover:text-blue-600">Kecamatan</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed">
+                        <p id="descKecamatan" class="text-gray-500 text-sm leading-relaxed">
                             Kelola data wilayah banjir dan persiapkan bantuan tepat sasaran dan akurat
                         </p>
                     </div>
@@ -189,34 +174,41 @@
     </div>
 
     <script>
+        lucide.createIcons();
+
         function openModal(type) {
             const modal = document.getElementById('authModal');
             const title = document.getElementById('modalTitle');
             const linkWarga = document.getElementById('linkWarga');
             const linkKecamatan = document.getElementById('linkKecamatan');
+            const descKecamatan = document.getElementById('descKecamatan');
 
             if (type === 'login') {
                 title.innerText = "Masuk ke SiEval DSS sebagai:";
-                linkWarga.href = "/login?role=warga";
-                linkKecamatan.href = "/login?role=rw"; // 'rw' merepresentasikan Kecamatan/Petugas
+                linkWarga.href = "/login?role=rw"; 
+                linkKecamatan.href = "/login?role=kecamatan"; 
+                descKecamatan.innerText = "Kelola data wilayah banjir dan persiapkan bantuan tepat sasaran dan akurat";
             } else {
-                title.innerText = "Daftar ke SiEval DSS sebagai:";
-                linkWarga.href = "/register?role=warga";
-                linkKecamatan.href = "/register?role=rw";
+                title.innerText = "Daftar Akun SiEval DSS sebagai:";
+                linkWarga.href = "/register"; // RW bebas daftar
+                
+                // Meskipun dia pencet "Daftar", Kecamatan tetap diarahkan ke Login (Tidak bisa daftar)
+                linkKecamatan.href = "/login?role=kecamatan"; 
+                descKecamatan.innerHTML = "<span class='text-gray-500 text-sm leading-relaxed'>Kelola data wilayah banjir dan persiapkan bantuan tepat sasaran dan akurat</span>";
             }
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            document.body.style.overflow = 'hidden'; // Kunci scroll di background
         }
 
         function closeModal() {
             const modal = document.getElementById('authModal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
-            document.body.style.overflow = 'auto'; // Unlock scroll
+            document.body.style.overflow = 'auto'; // Buka scroll
         }
 
-        // Close modal if clicking outside the content
         window.onclick = function(event) {
             const modal = document.getElementById('authModal');
             if (event.target == modal) {

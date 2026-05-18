@@ -2,30 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
+use App\Models\LaporanBanjir;
+use App\Models\User; 
 use Illuminate\Http\Request;
-use App\Models\User; // Atau model data banjir Anda
+use Illuminate\Support\Facades\Auth;
 
 class PetaBanjirController extends Controller
 {
+    // Portal Peta untuk Ketua RW
     public function indexRW()
     {
-        // Pastikan hanya role 'rw' yang bisa akses
-        if (auth()->user()->role !== 'rw') {
-            return redirect('/peta-banjir');
-        }
-
-        // Contoh data dummy (Nanti bisa diambil dari Database)
+        // TIDAK PERLU Cek Auth::user()->role lagi di sini, sudah dijaga oleh Middleware!
+        
         $rwData = $this->getFloodData();
 
-        return view('peta', compact('rwData'));
-    }
-
-    public function indexWarga()
-    {
-        $rwData = $this->getFloodData();
+        // Mengarah ke resources/views/warga/peta.blade.php sesuai screenshot folder kamu
         return view('warga.peta', compact('rwData'));
     }
 
+    // Portal Peta untuk Camat / Kecamatan
+    public function indexCamat()
+    {
+        // Ambil semua laporan yang memiliki titik koordinat valid
+        $laporan_banjir = LaporanBanjir::whereNotNull('latitude')
+                            ->whereNotNull('longitude')
+                            ->get();
+
+        // Oper data laporan ke file tampilan blade (Heatmap Map)
+        return view('kecamatan.peta', compact('laporan_banjir'));
+    }
+
+    // Data Dummy Laporan Banjir Bojongsoang
     private function getFloodData()
     {
         return [
