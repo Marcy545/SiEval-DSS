@@ -23,15 +23,12 @@
 <div class="w-full max-w-3xl bg-white rounded-[32px] shadow-2xl px-14 py-12">
 
     <div class="text-center">
-
         <h1 class="text-[44px] leading-tight font-extrabold text-[#111827]">
             Pendaftaran Akun RW
         </h1>
-
         <p class="text-gray-500 mt-4 text-[15px]">
             Daftar sebagai Ketua RW untuk mulai memantau dan melaporkan data banjir secara real-time di wilayah Anda.
         </p>
-
     </div>
 
     <a href="/" class="absolute top-6 left-6 flex items-center gap-2 px-5 py-2.5 bg-white/20 hover:bg-white/40 backdrop-blur-md text-slate-700 hover:text-slate-900 rounded-full transition-all duration-300 group z-50 border border-white/30 shadow-lg">
@@ -47,10 +44,8 @@
             <label class="block text-sm font-semibold text-gray-700 mb-3">
                 Nama Lengkap RW & Desa<span class="text-red-500">*</span>
             </label>
-
             <div class="relative">
                 <i data-lucide="map-pin" class="absolute left-4 top-4 w-5 h-5 text-gray-400"></i>
-
                 <input
                     type="text"
                     name="rw_desa"
@@ -83,7 +78,27 @@
 
         <div>
             <label class="block text-sm font-semibold text-gray-700 mb-3">
-                Password (6 Digit Angka)<span class="text-red-500">*</span>
+                No. HP Perwakilan (WhatsApp Active)<span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+                <i data-lucide="phone" class="absolute left-4 top-4 w-5 h-5 text-gray-400"></i>
+                <input
+                    type="tel"
+                    name="no_hp"
+                    value="{{ old('no_hp') }}"
+                    placeholder="Contoh: 081234567890"
+                    pattern="[0-9]{10,14}"
+                    inputmode="numeric"
+                    class="w-full border border-gray-300 rounded-full py-4 pl-12 pr-5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                >
+            </div>
+            @error('no_hp') <p class="text-red-500 text-xs mt-2 ml-4">{{ $message }}</p> @enderror
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-3">
+                Password (Min. 8 Karakter Kombinasi Huruf & Angka)<span class="text-red-500">*</span>
             </label>
             <div class="relative">
                 <i data-lucide="lock" class="absolute left-4 top-4 w-5 h-5 text-gray-400"></i>
@@ -91,10 +106,9 @@
                     id="password"
                     type="password"
                     name="password"
-                    maxlength="6"
-                    pattern="[0-9]{6}"
-                    inputmode="numeric"
-                    placeholder="Masukkan 6 digit angka"
+                    pattern="(?=.*\d)(?=.*[a-zA-Z]).{8,}"
+                    title="Password harus minimal 8 karakter dan mengandung kombinasi huruf serta angka"
+                    placeholder="Minimal 8 karakter (Huruf + Angka)"
                     class="w-full border border-gray-300 rounded-full py-4 pl-12 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                 >
@@ -138,7 +152,6 @@
 </div>
 
 <script>
-    // Inisialisasi ikon Lucide
     lucide.createIcons();
 
     function togglePassword() {

@@ -109,7 +109,7 @@
                 >
                 <span>Remember me</span>
             </label>
-            <a href="#" class="text-sm text-gray-500 hover:text-black transition">
+            <a href="{{ route('password.request') }}" class="text-sm font-semibold text-blue-600 hover:underline">
                 Forgot Password?
             </a>
         </div>

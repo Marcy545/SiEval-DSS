@@ -25,12 +25,19 @@ class AuthController extends Controller
         $request->validate([
             'rw_desa'  => 'required|string',
             'email'    => 'required|email|unique:users,email',
-            'password' => 'required|digits:6',
+            'no_hp'    => 'required|numeric|digits_between:10,14', // Validasi No HP standar
+            'password' => ['required', 'string', 'min:8', 'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/'], // Min 8 karakter, wajib huruf + angka
         ], [
-            'rw_desa.required'  => 'Nama lengkap RW & Desa wajib diisi.',
-            'email.required'    => 'Email wajib diisi.',
-            'email.unique'      => 'Email sudah digunakan.',
-            'password.digits'   => 'Password harus 6 digit angka.',
+            'rw_desa.required'   => 'Nama lengkap RW & Desa wajib diisi.',
+            'email.required'     => 'Email wajib diisi.',
+            'email.email'        => 'Format email tidak valid.',
+            'email.unique'       => 'Email sudah digunakan.',
+            'no_hp.required'     => 'Nomor HP wajib diisi.',
+            'no_hp.numeric'      => 'Nomor HP harus berupa angka.',
+            'no_hp.digits_between' => 'Nomor HP harus berisikan 10 sampai 14 digit.',
+            'password.required'  => 'Password wajib diisi.',
+            'password.min'       => 'Password harus minimal 8 karakter.',
+            'password.regex'     => 'Password harus berupa kombinasi huruf dan angka.',
         ]);
 
         User::create([

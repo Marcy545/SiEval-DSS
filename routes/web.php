@@ -59,13 +59,18 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
+// 1. Step Input Email Lupa Password
 Route::get('/forgot-password', [PasswordResetController::class, 'showForgotForm'])->name('password.request');
-
-// 2. Aksi kirim email token reset password
 Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
 
-// 3. Halaman form input password baru (diakses dari link email)
-Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+// 1. Halaman Input OTP (Method: GET) -> URL pakai /verify-otp/...
+Route::get('/verify-otp/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
 
-// 4. Aksi update password baru ke database
+// 2. Aksi Cek Validasi OTP (Method: POST) -> UBAH URL-nya menjadi /submit-otp-verification
+Route::post('/submit-otp-verification', [PasswordResetController::class, 'verifyOtp'])->name('password.verify');
+
+// 3. Halaman Form Pengisian Password Baru (Method: GET)
+Route::get('/reset-password-form', [PasswordResetController::class, 'showNewPasswordForm'])->name('password.new_form');
+
+// 5. Eksekusi Penggantian Password Baru ke Database (POST)
 Route::post('/reset-password', [PasswordResetController::class, 'updatePassword'])->name('password.update');
