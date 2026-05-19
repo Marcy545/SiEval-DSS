@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\User;
+use App\Services\FloodScoringService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class LaporanBanjir extends Model
 {
     use HasFactory;
+    protected $guarded = [];
 
     protected $fillable = [
         'user_id', 'rw_kelurahan', 'status_banjir', 'ketinggian_air', 'durasi_banjir',
@@ -25,4 +28,16 @@ class LaporanBanjir extends Model
     {
         return $this->belongsTo(User::class);
     }
+    protected $appends = ['priority_score', 'priority_label'];
+
+    public function getPriorityScoreAttribute()
+    {
+        return FloodScoringService::calculateScore($this);
+    }
+
+    public function getPriorityLabelAttribute()
+    {
+        return FloodScoringService::getLabel($this->priority_score);
+    }
+
 }

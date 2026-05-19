@@ -52,17 +52,17 @@ class DashboardController extends Controller
     public function show($id)
     {
         $laporan = LaporanBanjir::findOrFail($id);
+        
+        // Memanggil fungsi dari service asli milikmu
         $faktor_penentu = FloodScoringService::getDeterminants($laporan);
         $rekomendasi_ai = FloodScoringService::getAiRecommendation($laporan->priority_score, $laporan);
 
         $loss_raw = FloodScoringService::calculateEconomicLoss($laporan);
         $kerugian_ekonomi = number_format($loss_raw, 0, ',', '.'); 
         $kecepatan_arus = $laporan->ketinggian_air > 120 ? '75%' : ($laporan->ketinggian_air > 60 ? '45%' : '15%');
-        $historis_kejadian = "3 Kali dalam setahun terakhir";
 
         return view('kecamatan.detail_laporan', compact(
-            'laporan', 'faktor_penentu', 'rekomendasi_ai', 
-            'kerugian_ekonomi', 'kecepatan_arus', 'historis_kejadian'
+            'laporan', 'faktor_penentu', 'rekomendasi_ai', 'kerugian_ekonomi', 'kecepatan_arus'
         ));
     }
 
@@ -70,4 +70,37 @@ class DashboardController extends Controller
     {
         return view('kecamatan.history'); 
     }
+
+        public function showFoto($filename)
+    {
+        // 1. Cek kemungkinan path di folder private (Laravel 11 standard)
+        $pathPrivate = storage_path('app/private/laporan_banjir/' . $filename);
+        
+        // 2. Cek juga kemungkinan path di folder public (jaga-jaga kalau tersimpan di public)
+        $pathPublic = storage_path('app/public/laporan_banjir/' . $filename);
+
+        // Tentukan path mana yang benar-benar memuat file fisik gambar
+        if (file_exists($pathPrivate)) {
+            $path = $pathPrivate;
+        } elseif (file_exists($pathPublic)) {
+            $path = $pathPublic;
+        } else {
+            // JIKA TIDAK KETEMU: Jangan abort(404) biasa. Kembalikan teks info biar gampang di-debug
+            return response()->json([
+                'error' => 'File gambar tidak ditemukan di server.',
+                'path_private_yang_dicari' => $pathPrivate,
+                'path_public_yang_dicari' => $pathPublic,
+            ], 404);
+        }
+
+        // 3. Ambil Mime Type gambar secara aman (misal: image/png, image/jpeg)
+        $mimeType = mime_content_type($path);
+
+        // 4. Alirkan file dengan Header Content-Type yang dipaksa agar browser tahu ini gambar
+        return response()->file($path, [
+            'Content-Type' => $mimeType,
+            'Cache-Control' => 'no-cache, must-revalidate'
+        ]);
+    }
+
 }

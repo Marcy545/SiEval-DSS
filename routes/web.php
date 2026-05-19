@@ -5,6 +5,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PetaBanjirController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LaporanBanjirController;
+use App\Http\Controllers\PasswordResetController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Public & Guest Routes
@@ -40,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/history', [DashboardController::class, 'history'])->name('kecamatan.history');
         Route::get('/kecamatan/peta-banjir', [PetaBanjirController::class, 'indexCamat'])->name('kecamatan.peta');
         Route::get('/kecamatan/laporan/{id}', [DashboardController::class, 'show'])->name('kecamatan.detail_laporan');
+        Route::get('/kecamatan/laporan/foto/{filename}', [DashboardController::class, 'showFoto'])->name('kecamatan.laporan.foto');
     });
 
     /*
@@ -54,3 +58,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/rw/laporan', [LaporanBanjirController::class, 'store'])->name('rw.laporan.store');
     });
 });
+
+Route::get('/forgot-password', [PasswordResetController::class, 'showForgotForm'])->name('password.request');
+
+// 2. Aksi kirim email token reset password
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+
+// 3. Halaman form input password baru (diakses dari link email)
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+
+// 4. Aksi update password baru ke database
+Route::post('/reset-password', [PasswordResetController::class, 'updatePassword'])->name('password.update');

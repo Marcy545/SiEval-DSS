@@ -49,7 +49,7 @@ class LaporanBanjirController extends Controller
                     // Berikan nama unik berbasis waktu agar tidak bentrok di server HP warga
                     $namaFoto = 'sieval_'.time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
                     // Simpan fisik file ke folder: storage/app/public/laporan_banjir
-                    $file->storeAs('public/laporan_banjir', $namaFoto);
+                    $file->storeAs('laporan_banjir', $namaFoto);
                     $fotoSaved[] = $namaFoto;
                 }
             }
@@ -80,4 +80,5 @@ class LaporanBanjirController extends Controller
         // 4. Redirect kembali dengan Flash Message sukses
         return redirect()->back()->with('success', 'Laporan banjir berhasil dikirim ke Kecamatan Bojongsoang!');
     }
+
 }
