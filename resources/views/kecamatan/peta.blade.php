@@ -29,12 +29,15 @@
     <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between hidden md:flex shrink-0 relative z-20">
         <div>
             <div class="p-6 flex items-center gap-3">
-                <div class="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-white"><i data-lucide="shield-alert" class="w-5 h-5 text-blue-400"></i></div>
+                <div class="w-10 h-10 rounded-full overflow-hidden border border-slate-200 bg-white flex items-center justify-center shrink-0 shadow-sm">
+                    <img src="{{ url('/kecamatan/laporan/foto/logo.png') }}" alt="Logo SiEval DSS" class="w-full h-full object-cover">
+                </div>
                 <div>
                     <h1 class="text-base font-bold text-slate-900 leading-tight">SiEval DSS</h1>
                     <p class="text-[11px] text-slate-500 font-medium">Kec. Bojongsoang</p>
                 </div>
             </div>
+            
             <nav class="px-4 space-y-1 mt-4">
                 <a href="{{ route('kecamatan.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-lg font-medium text-sm transition">
                     <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
@@ -47,9 +50,12 @@
                 </a>
             </nav>
         </div>
+        
         <div class="p-4 border-t border-slate-200 space-y-3">
             <div class="flex items-center gap-3 px-2 mb-3">
-                <div class="w-9 h-9 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs">CM</div>
+                <div class="w-9 h-9 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs">
+                    {{ strtoupper(substr(Auth::user()->name ?? 'CM', 0, 2)) }}
+                </div>
                 <div class="overflow-hidden">
                     <p class="text-xs font-bold text-slate-900 truncate">{{ Auth::user()->name ?? 'Camat Bojongsoang' }}</p>
                     <p class="text-[10px] text-slate-400 truncate">{{ Auth::user()->email ?? 'camat@bojongsoang.go.id' }}</p>
@@ -57,7 +63,9 @@
             </div>
             <form action="{{ route('logout') }}" method="POST" class="w-full">
                 @csrf
-                <button type="submit" class="flex w-full items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium text-sm transition"><i data-lucide="log-out" class="w-4 h-4"></i> Keluar</button>
+                <button type="submit" class="flex w-full items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium text-sm transition">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+                </button>
             </form>
         </div>
     </aside>
@@ -69,7 +77,7 @@
             <div class="flex items-center gap-4">
                 <div class="relative hidden lg:block">
                     <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
-                    <input type="text" placeholder="Cari RW atau wilayah..." class="bg-slate-100 border border-slate-200 text-sm rounded-full pl-9 pr-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="mapSearchInput" placeholder="Cari RW atau wilayah..." class="bg-slate-100 border border-slate-200 text-sm rounded-full pl-9 pr-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
         </header>
@@ -93,7 +101,7 @@
                         <span class="text-xs font-medium text-slate-600">Risiko Rendah / Ringan</span>
                     </div>
                     <div class="flex items-center gap-2 mt-3 pt-2 border-t border-slate-100">
-                        <div class="w-16 h-3 rounded bg-gradient-to-r from-blue-400 via-amber-400 to-red-500"></div>
+                        <div class="w-16 h-3 rounded bg-gradient-to-r from-blue-400 via-yellow-400 via-orange-400 to-red-600"></div>
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Intensitas Panas</span>
                     </div>
                 </div>
@@ -105,7 +113,7 @@
                     <p class="text-[11px] text-slate-500 mt-1">Kecamatan Bojongsoang (Real-time)</p>
                 </div>
                 
-                <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                <div class="flex-1 overflow-y-auto p-4 space-y-4" id="laporanListContainer">
                     @forelse($laporan_banjir->sortByDesc('priority_score') as $laporan)
                     
                     @php
@@ -113,7 +121,7 @@
                         $badgeColor = $laporan->priority_score >= 75 ? 'bg-red-100 text-red-700' : ($laporan->priority_score >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700');
                     @endphp
 
-                    <div class="p-4 rounded-xl border {{ $bgColor }} shadow-sm flex flex-col justify-between">
+                    <div class="p-4 rounded-xl border {{ $bgColor }} shadow-sm flex flex-col justify-between laporan-card" data-rw="{{ strtolower($laporan->rw_kelurahan) }}">
                         <div class="mb-2">
                             <span class="text-sm font-bold text-slate-900 block truncate">{{ $laporan->rw_kelurahan }}</span>
                         </div>
@@ -125,13 +133,18 @@
 
                         <div class="mb-2.5">
                             <span class="block w-full py-1 text-center text-[10px] font-black tracking-wider rounded-full shadow-inner {{ $badgeColor }}">
-                                STATUS: {{ $laporan->priority_label }}
+                                STATUS: {{ ($laporan->priority_score ?? 0) >= 75 ? 'PARAH' : (($laporan->priority_score ?? 0) >= 50 ? 'SEDANG' : 'RENDAH') }}
                             </span>
                         </div>
 
-                        <a href="{{ route('kecamatan.detail_laporan', $laporan->id) }}" class="block w-full py-2 text-center text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-full transition shadow-sm">
-                            Lihat Detail
-                        </a>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="focusToMarker({{ $laporan->id }}, {{ $laporan->latitude }}, {{ $laporan->longitude }})" class="py-2 text-center text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition">
+                                Lihat Peta
+                            </button>
+                            <a href="{{ route('kecamatan.detail_laporan', $laporan->id) }}" class="block py-2 text-center text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-full transition shadow-sm">
+                                Detail DSS
+                            </a>
+                        </div>
                     </div>
                     @empty
                     <div class="flex flex-col items-center justify-center text-center py-10 opacity-50">
@@ -156,20 +169,20 @@
     <script>
         lucide.createIcons();
 
-        // 1. Inisialisasi Peta (Kecamatan Bojongsoang)
+        // 1. Inisialisasi Peta Utama (Kecamatan Bojongsoang)
         const map = L.map('map', { zoomControl: false }).setView([-6.9749, 107.6369], 13);
-        
         L.control.zoom({ position: 'topleft' }).addTo(map);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
         }).addTo(map);
 
-        // 2. Data Titik Banjir
+        // 2. Deklarasi Data & Penyimpanan Marker Objek
         const rawLaporanData = {!! json_encode($laporan_banjir) !!};
         const heatPoints = []; 
+        const markerStorage = {}; // Untuk menyimpan instansiasi marker agar bisa difokuskan dari sidebar
 
-        // 3. Render Marker Pin Satuan & Kumpulkan Titik Heatmap
+        // 3. Loop Render Titik & Konstruksi Intensitas Kebisingan Panas (Heatmap)
         rawLaporanData.forEach(laporan => {
             const lat = parseFloat(laporan.latitude);
             const lng = parseFloat(laporan.longitude);
@@ -178,67 +191,96 @@
 
             let markerColor = '#22c55e'; 
             let headerClass = 'bg-green-600';
-            let heatIntensity = 0.4; 
+            let heatIntensity = 0.3; // Default intensitas rendah (skala kontribusi visual)
 
+            // Mengintegrasikan bobot intensitas panas secara proporsional berbasis priority score AI krisis
             if (laporan.priority_score >= 75) {
                 markerColor = '#dc2626'; 
                 headerClass = 'bg-red-600';
-                heatIntensity = 1.0; 
+                heatIntensity = 1.0; // Panas penuh (Zona Merah Pekat)
             } else if (laporan.priority_score >= 50) {
                 markerColor = '#f59e0b'; 
                 headerClass = 'bg-amber-500';
-                heatIntensity = 0.7; 
+                heatIntensity = 0.65; // Panas sedang (Zona Oranye/Kuning)
             }
 
+            // Memasukkan array koordinat serta bobot intensitas krisis ke antrean generator heatmap
             heatPoints.push([lat, lng, heatIntensity]);
 
-            // B. Buat Custom Circle Marker (Radius: 14)
+            // Konstruksi Lingkaran Marker Satuan
             const circleMarker = L.circleMarker([lat, lng], {
-                radius: 14,      
+                radius: 12,      
                 fillColor: markerColor,
                 color: "#ffffff",
-                weight: 2.5,     
+                weight: 2,     
                 opacity: 1,
-                fillOpacity: 0.95
+                fillOpacity: 0.9
             }).addTo(map);
 
-            // C. Popup Keterangan
+            // Pasang HTML Card ke dalam jendela popup pin
             const popupHTML = `
                 <div class="${headerClass} custom-popup-header">
                     ${laporan.rw_kelurahan}
                 </div>
-                <div class="custom-popup-body space-y-2">
+                <div class="custom-popup-body space-y-1.5">
                     <p class="font-semibold text-slate-800 flex justify-between border-b pb-1">
                         <span>Tinggi Air:</span> <span class="font-mono text-red-600">${laporan.ketinggian_air} cm</span>
                     </p>
-                    <p class="flex justify-between">
+                    <p class="flex justify-between text-xs">
                         <span>Terdampak:</span> <span class="font-bold">${laporan.jumlah_kk} KK</span>
                     </p>
-                    <p class="flex justify-between">
-                        <span>Evakuasi:</span> <span class="font-bold">${laporan.butuh_evakuasi}</span>
+                    <p class="flex justify-between text-xs">
+                        <span>Urgensi Evakuasi:</span> <span class="font-bold text-slate-700">${laporan.butuh_evakuasi}</span>
                     </p>
-                    <div class="pt-2 text-center">
-                        <a href="/kecamatan/laporan/${laporan.id}" class="text-xs text-blue-600 font-bold hover:underline">Analisis DSS ➔</a>
+                    <div class="pt-2 text-center border-t mt-2">
+                        <a href="/kecamatan/detail-laporan/${laporan.id}" class="text-xs text-blue-600 font-bold hover:underline inline-block">Analisis DSS ➔</a>
                     </div>
                 </div>
             `;
             circleMarker.bindPopup(popupHTML);
+            
+            // Simpan objek marker ke storage global dengan ID laporan sebagai kunci pencari
+            markerStorage[laporan.id] = circleMarker;
         });
 
-        // 4. Layers Awan Heatmap (Radius: 50)
+        // 4. Render Awan Heatmap Berdasarkan Bobot Intensitas Gradien yang Diperbaiki
         if (heatPoints.length > 0) {
-            const heatLayer = L.heatLayer(heatPoints, {
-                radius: 50,      
-                blur: 25,        
+            L.heatLayer(heatPoints, {
+                radius: 45,      
+                blur: 20,        
                 maxZoom: 15,     
                 gradient: {
-                    0.2: '#60a5fa', 
-                    0.5: '#facc15', 
-                    0.8: '#fb923c', 
-                    1.0: '#dc2626'  
+                    0.2: '#60a5fa', // Rendah: Biru Laut lembut
+                    0.4: '#eab308', // Sedang-bawah: Kuning
+                    0.7: '#f97316', // Sedang-atas: Oranye hangat
+                    1.0: '#dc2626'  // Kritis/Tinggi: Merah Pekat
                 }
             }).addTo(map);
         }
+
+        // 5. Fungsi Navigasi Interaktif Fokus Titik saat tombol "Lihat Peta" di sidebar diklik
+        function focusToMarker(id, lat, lng) {
+            if (markerStorage[id]) {
+                map.setView([lat, lng], 15, { animate: true, duration: 1 });
+                markerStorage[id].openPopup();
+            }
+        }
+
+        // 6. Fungsi Live Filter Pencarian Wilayah di Sidebar Kanan
+        const searchInput = document.getElementById('mapSearchInput');
+        const cards = document.querySelectorAll('.laporan-card');
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            cards.forEach(card => {
+                const text = card.getAttribute('data-rw');
+                if (text.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
     </script>
 </body>
 </html>

@@ -68,7 +68,14 @@ class DashboardController extends Controller
 
     public function history()
     {
-        return view('kecamatan.history'); 
+        // Ambil seluruh data laporan banjir dari database
+        $laporan_all = LaporanBanjir::orderBy('created_at', 'desc')->get();
+        
+        // Ambil juga data darurat untuk indikator bell notifikasi di header
+        $darurat = LaporanBanjir::where('butuh_evakuasi', 'Ya, Mendesak!')->first();
+
+        // Kirim kedua variabel ke view history
+        return view('kecamatan.history', compact('laporan_all', 'darurat'));
     }
 
         public function showFoto($filename)

@@ -20,9 +20,6 @@
     <header class="bg-white border-b border-slate-200 py-4 px-8 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <a href="{{ route('kecamatan.dashboard') }}" class="p-2 hover:bg-slate-100 rounded-full transition group">
-                    <i data-lucide="arrow-left" class="w-5 h-5 text-slate-600 group-hover:-translate-x-0.5 transition-transform"></i>
-                </a>
                 <h1 class="text-xl font-bold text-slate-900 tracking-tight">{{ $laporan->rw_kelurahan }}</h1>
             </div>
             
@@ -69,7 +66,7 @@
             </div>
 
             @php
-                // Hitung kontribusi riil yang didapatkan oleh masing-masing kriteria berdasarkan isi data laporan masuk
+                // Hitung kontribusi riil dari laporan saat ini berbasis batas alokasi model kriteria SPK
                 $pct_air = ($laporan->ketinggian_air >= 150) ? 20 : round(($laporan->ketinggian_air / 150) * 20);
 
                 $total_bangunan = ($laporan->rumah_tergenang ?? 0) + ($laporan->toko_terdampak ?? 0);
@@ -90,55 +87,55 @@
                 
                 <div class="space-y-4 flex-1 flex flex-col justify-center">
                     
-                    <div class="space-y-1 w-full pb-3 border-b border-slate-100">
+                    <div class="space-y-1 w-full pb-2 border-b border-slate-50">
                         <div class="flex justify-between text-xs font-semibold items-center">
                             <span class="text-slate-600 font-medium">Kerugian Material & Ekonomi</span>
                             <span class="text-red-600 font-bold font-mono text-sm">{{ $pct_material }}%</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                            <div class="bg-red-600 h-full rounded-full transition-all duration-500" style="width: {{ ($pct_material / 30) * 100 }}%"></div>
+                            <div class="bg-red-600 h-full rounded-full transition-all duration-500" style="width: {{ $pct_material }}%"></div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3.5">
                         
-                        <div class="space-y-1.5">
+                        <div class="space-y-1">
                             <div class="flex justify-between text-xs font-semibold items-center">
                                 <span class="text-slate-600 font-medium">Kelompok Rentan</span>
                                 <span class="text-slate-900 font-bold font-mono">{{ $pct_rentan }}%</span>
                             </div>
-                            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
-                                <div class="bg-slate-900 h-full rounded-full transition-all duration-500" style="width: {{ ($pct_rentan / 25) * 100 }}%"></div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-slate-800 h-full rounded-full transition-all duration-500" style="width: {{ $pct_rentan }}%"></div>
                             </div>
                         </div>
 
-                        <div class="space-y-1.5">
+                        <div class="space-y-1">
                             <div class="flex justify-between text-xs font-semibold items-center">
                                 <span class="text-slate-600 font-medium">Tinggi Air Terkini</span>
                                 <span class="text-slate-900 font-bold font-mono">{{ $pct_air }}%</span>
                             </div>
-                            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
-                                <div class="bg-slate-900 h-full rounded-full transition-all duration-500" style="width: {{ ($pct_air / 20) * 100 }}%"></div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-slate-800 h-full rounded-full transition-all duration-500" style="width: {{ $pct_air }}%"></div>
                             </div>
                         </div>
 
-                        <div class="space-y-1.5">
+                        <div class="space-y-1">
                             <div class="flex justify-between text-xs font-semibold items-center">
                                 <span class="text-slate-600 font-medium">Historis Wilayah</span>
                                 <span class="text-slate-900 font-bold font-mono">{{ $pct_evakuasi }}%</span>
                             </div>
-                            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
-                                <div class="bg-slate-900 h-full rounded-full transition-all duration-500" style="width: {{ ($pct_evakuasi / 15) * 100 }}%"></div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-slate-800 h-full rounded-full transition-all duration-500" style="width: {{ $pct_evakuasi }}%"></div>
                             </div>
                         </div>
 
-                        <div class="space-y-1.5">
+                        <div class="space-y-1">
                             <div class="flex justify-between text-xs font-semibold items-center">
                                 <span class="text-slate-600 font-medium">Kecepatan Arus</span>
                                 <span class="text-slate-900 font-bold font-mono">{{ $pct_arus }}%</span>
                             </div>
-                            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
-                                <div class="bg-slate-900 h-full rounded-full transition-all duration-500" style="width: {{ ($pct_arus / 10) * 100 }}%"></div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-slate-800 h-full rounded-full transition-all duration-500" style="width: {{ $pct_arus }}%"></div>
                             </div>
                         </div>
                         
