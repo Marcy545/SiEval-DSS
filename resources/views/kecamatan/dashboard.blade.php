@@ -67,14 +67,8 @@
             <div class="flex items-center gap-4">
                 <div class="relative hidden lg:block">
                     <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
-                    <input type="text" placeholder="Cari wilayah..." class="bg-slate-100 border border-slate-200 text-sm rounded-full pl-9 pr-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="navbarSearch" placeholder="Cari wilayah RW..." class="bg-slate-100 border border-slate-200 text-sm rounded-full pl-9 pr-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <button class="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center relative hover:bg-slate-50 text-slate-500">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
-                    @if($darurat)
-                        <span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                    @endif
-                </button>
             </div>
         </header>
 
@@ -97,7 +91,7 @@
             </div>
             @endif
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
                     <div class="flex justify-between items-start mb-2">
                         <p class="text-xs font-semibold text-slate-500 tracking-wider">Keluarga Terdampak</p>
@@ -106,19 +100,6 @@
                     <div class="flex items-baseline gap-1">
                         <h3 class="text-3xl font-bold text-slate-800">{{ number_format($total_kk ?? 0) }}</h3>
                         <span class="text-sm font-medium text-slate-500">KK</span>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-xs font-semibold text-slate-500 tracking-wider">Kerugian Finansial</p>
-                        <i data-lucide="banknote" class="w-5 h-5 text-green-600"></i>
-                    </div>
-                    <div class="flex items-baseline gap-1">
-                        <span class="text-xl font-bold text-slate-800">Rp</span>
-                        <h3 class="text-2xl font-extrabold text-slate-800">
-                            {{ number_format($total_kerugian ?? 0, 0, ',', '.') }}
-                        </h3>
                     </div>
                 </div>
                 
@@ -147,23 +128,40 @@
                     </div>
                     
                     @if(isset($list_fasum) && $list_fasum->isNotEmpty())
-                    <div class="mt-4 pt-3 border-t border-slate-100">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Rincian Fasilitas Publik:</p>
-                        <div class="overflow-y-auto max-h-24 pr-1 space-y-1">
-                            @foreach($list_fasum as $fasum)
-                                <div class="flex items-start gap-1.5 text-xs text-slate-600">
-                                    <i data-lucide="building" class="w-3 h-3 text-blue-500 shrink-0 mt-0.5"></i>
-                                    <span class="leading-tight font-medium text-slate-700">
-                                        {{ $fasum->fasum_terdampak }}
-                                    </span>
-                                </div>
-                            @endforeach
+                        @php
+                            $fasum_unik = $list_fasum->pluck('fasum_terdampak')
+                                ->flatMap(function ($item) {
+                                    return explode(',', $item);
+                                })
+                                ->map(function ($item) {
+                                    return ucwords(trim(strtolower($item)));
+                                })
+                                ->filter()
+                                ->countBy();
+                        @endphp
+
+                        <div class="mt-4 pt-3 border-t border-slate-100">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Rincian Fasilitas Publik:</p>
+                            <div class="overflow-y-auto max-h-24 pr-1 space-y-1">
+                                @foreach($fasum_unik as $nama_fasum => $jumlah)
+                                    <div class="flex items-center justify-between text-xs text-slate-600 py-0.5">
+                                        <div class="flex items-center gap-1.5">
+                                            <i data-lucide="building" class="w-3 h-3 text-blue-500 shrink-0"></i>
+                                            <span class="leading-tight font-medium text-slate-700">
+                                                {{ $nama_fasum }}
+                                            </span>
+                                        </div>
+                                        <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                            {{ $jumlah }}
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
                     @else
-                    <div class="mt-4 pt-3 border-t border-slate-100 text-center">
-                        <p class="text-xs text-slate-400 font-medium">Belum ada fasilitas publik yang dilaporkan terdampak.</p>
-                    </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 text-center">
+                            <p class="text-xs text-slate-400 font-medium">Belum ada fasilitas publik yang dilaporkan terdampak.</p>
+                        </div>
                     @endif
                 </div>
 
@@ -173,67 +171,79 @@
                         <canvas id="barChart"></canvas>
                     </div>
                 </div>
-
             </div>
 
             <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
                 <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
-                    <h3 class="text-lg font-bold text-slate-800">Urutan Prioritas Krisis AI</h3>
-                    <div class="flex gap-2">
-                        <button class="p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition"><i data-lucide="filter" class="w-4 h-4"></i></button>
+                    <h3 class="text-base font-bold text-slate-900 tracking-tight">Zona Banjir</h3>
+                    <div class="relative inline-block text-left">
+                        <select id="tableFilter" class="text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-700 rounded-lg px-3 py-2 pr-8 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+                            <option value="ALL">Semua Status</option>
+                            <option value="PARAH">Status: PARAH</option>
+                            <option value="SEDANG">Status: SEDANG</option>
+                            <option value="RENDAH">Status: RENDAH</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none"></i>
                     </div>
                 </div>
+                
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse" id="floodTable">
                         <thead>
-                            <tr class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
-                                <th class="px-6 py-4 font-semibold whitespace-nowrap">Nama Wilayah</th>
-                                <th class="px-6 py-4 font-semibold text-center whitespace-nowrap">Tinggi Air</th>
-                                <th class="px-6 py-4 font-semibold text-center whitespace-nowrap">KK Terdampak</th>
-                                <th class="px-6 py-4 font-semibold text-center text-blue-600 whitespace-nowrap">Skor Krisis AI</th>
+                            <tr class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-400 font-semibold border-b border-slate-200">
+                                <th class="px-6 py-4 font-semibold whitespace-nowrap">Nama RW</th>
+                                <th class="px-6 py-4 font-semibold text-center whitespace-nowrap">Ketinggian Air (CM)</th>
+                                <th class="px-6 py-4 font-semibold text-center whitespace-nowrap">Jumlah KK</th>
+                                <th class="px-6 py-4 font-semibold text-center whitespace-nowrap">Tanggal Kejadian</th>
+                                <th class="px-6 py-4 font-semibold text-center whitespace-nowrap">Status Keparahan</th>
                                 <th class="px-6 py-4 font-semibold text-right whitespace-nowrap">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            @forelse($laporan_terbaru as $laporan)
-                            <tr class="hover:bg-slate-50 transition">
-                                <td class="px-6 py-4">
-                                    <p class="text-sm font-bold text-slate-800">{{ $laporan->rw_kelurahan }}</p>
+                            @forelse($lSimple_laporan_terbaru ?? $laporan_terbaru as $laporan)
+                            <tr class="hover:bg-slate-50/80 transition data-row">
+                                <td class="px-6 py-5 whitespace-nowrap search-target">
+                                    <p class="text-sm font-bold text-slate-900 leading-tight">{{ $laporan->rw_kelurahan }}</p>
                                 </td>
-                                <td class="px-6 py-4 text-center font-bold text-slate-800 text-sm">
-                                    {{ $laporan->ketinggian_air }} cm
+                                <td class="px-6 py-5 text-center font-bold text-slate-900 text-sm whitespace-nowrap">
+                                    {{ $laporan->ketinggian_air }}
                                 </td>
-                                <td class="px-6 py-4 text-center text-sm text-slate-600">
-                                    {{ $laporan->jumlah_kk }} KK
+                                <td class="px-6 py-5 text-center text-sm text-slate-500 whitespace-nowrap">
+                                    {{ number_format($laporan->jumlah_kk) }} KK
                                 </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex flex-col items-center">
-                                        <span class="text-lg font-black {{ $laporan->priority_score >= 75 ? 'text-red-600' : ($laporan->priority_score >= 50 ? 'text-amber-500' : 'text-green-500') }}">
-                                            {{ $laporan->priority_score }}<span class="text-xs text-slate-400 font-medium">/100</span>
-                                        </span>
-                                        <span class="text-[10px] font-bold mt-1 tracking-wider px-2 py-0.5 rounded-full {{ $laporan->priority_score >= 75 ? 'bg-red-100 text-red-700' : ($laporan->priority_score >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') }}">
-                                            {{ $laporan->priority_label }}
-                                        </span>
-                                    </div>
+                                <td class="px-6 py-5 text-center text-xs text-slate-500 whitespace-nowrap">
+                                    {{ $laporan->created_at ? $laporan->created_at->translatedFormat('d F Y, H:i') . ' WIB' : '23 April 2026, 12:00 WIB' }}
                                 </td>
-                                <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('kecamatan.detail_laporan', $laporan->id) }}" class="bg-slate-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold hover:bg-slate-800 transition shadow-sm inline-block">
+                                <td class="px-6 py-5 text-center whitespace-nowrap filter-target">
+                                    <span class="text-[10px] font-bold tracking-wider px-3 py-1 rounded-full uppercase inline-block status-badge
+                                        {{ ($laporan->priority_score ?? 0) >= 75 ? 'bg-red-50 text-red-500 border border-red-200' : (($laporan->priority_score ?? 0) >= 50 ? 'bg-amber-50 text-amber-500 border border-amber-200' : 'bg-green-50 text-green-600 border border-green-200') }}">
+                                        {{ ($laporan->priority_score ?? 0) >= 75 ? 'PARAH' : (($laporan->priority_score ?? 0) >= 50 ? 'SEDANG' : 'RENDAH') }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-5 text-right whitespace-nowrap">
+                                    <a href="{{ route('kecamatan.detail_laporan', $laporan->id) }}" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-full text-xs font-semibold transition shadow-sm inline-block tracking-wide">
                                         Detail
                                     </a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-10 text-center text-sm text-slate-500">
+                                <td colspan="6" class="px-6 py-12 text-center text-sm text-slate-400">
                                     <div class="flex flex-col items-center justify-center space-y-2">
                                         <i data-lucide="inbox" class="w-8 h-8 text-slate-300"></i>
-                                        <span>Belum ada data laporan banjir yang masuk.</span>
+                                        <span class="font-medium">Belum ada data laporan banjir dari pihak RW.</span>
                                     </div>
                                 </td>
                             </tr>
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                <div class="p-4 border-t border-slate-100 text-center bg-white">
+                    <a href="{{ route('kecamatan.history') }}" class="text-xs font-bold text-slate-900 uppercase tracking-wider hover:text-slate-700 transition">
+                        Lihat Lainnya
+                    </a>
                 </div>
             </div>
 
@@ -243,7 +253,35 @@
     <script>
         lucide.createIcons();
 
-        // Ambil data dari Controller Laravel
+        // JS LIVE SEARCH & LIVE FILTER
+        const searchInput = document.getElementById('navbarSearch');
+        const filterSelect = document.getElementById('tableFilter');
+        const tableRows = document.querySelectorAll('.data-row');
+
+        function filterTable() {
+            const searchText = searchInput.value.toLowerCase().trim();
+            const filterValue = filterSelect.value;
+
+            tableRows.forEach(row => {
+                const rwName = row.querySelector('.search-target').textContent.toLowerCase();
+                const statusBadge = row.querySelector('.status-badge').textContent.trim();
+
+                const matchesSearch = rwName.includes(searchText);
+                const matchesFilter = (filterValue === 'ALL' || statusBadge === filterValue);
+
+                if (matchesSearch && matchesFilter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput.addEventListener('input', filterTable);
+        filterSelect.addEventListener('change', filterTable);
+
+
+        // INSTANSI GRAFIK CHART JS
         const rwLabels = {!! json_encode($chart_ketinggian->pluck('rw_kelurahan') ?? []) !!};
         const airData = {!! json_encode($chart_ketinggian->pluck('ketinggian_air') ?? []) !!};
 
@@ -251,7 +289,7 @@
         const tokoTerdampak = {{ $sum_toko ?? 0 }};
         const fasumTerdampak = {{ $sum_fasum ?? 0 }};
 
-        // 1. Render Donut Chart Sektor Terdampak dengan Legend Muncul Pas
+        // Donut Chart
         const ctxDonut = document.getElementById('donutChart').getContext('2d');
         new Chart(ctxDonut, {
             type: 'doughnut',
@@ -282,7 +320,7 @@
             }
         });
 
-        // 2. Render Bar Chart Horizontal
+        // Bar Chart
         const ctxBar = document.getElementById('barChart').getContext('2d');
         new Chart(ctxBar, {
             type: 'bar',
