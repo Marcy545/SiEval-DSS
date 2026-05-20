@@ -16,7 +16,7 @@
     class="min-h-screen flex items-center justify-center bg-cover bg-center px-5"
     style="
         font-family: 'Inter', sans-serif;
-        background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop');
+        background-image: url('{{ asset('images/background 1.png') }}');
     "
 >
 
