@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
