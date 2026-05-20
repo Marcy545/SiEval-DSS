@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LaporanBanjir;
 use App\Services\FloodScoringService;
+use Illuminate\Support\Facades\File;
 
 class DashboardController extends Controller
 {
@@ -142,6 +143,21 @@ class DashboardController extends Controller
             'list_fasum'
         ));
     }
+    
+    public function history()
+    {
+        // Ambil seluruh data laporan banjir dari database
+        $laporan_all = LaporanBanjir::orderBy('created_at', 'desc')->get();
+        
+        // Ambil juga data darurat untuk indikator bell notifikasi di header
+        $darurat = LaporanBanjir::where('butuh_evakuasi', 'Ya, Mendesak!')->first();
+
+        // Kirim kedua variabel ke view history
+        return view('kecamatan.history', compact('laporan_all', 'darurat'));
+    }
+
+
+    
 
     /*
     |--------------------------------------------------------------------------
@@ -171,7 +187,7 @@ class DashboardController extends Controller
             }
 
             $pesanWa = urlencode(
-                "Halo Ketua RW {$laporan->rw_kelurahan}, kami dari Kecamatan Bojongsoang menerima laporan banjir dengan status {$laporan->priority_label}. Mohon segera memberikan update kondisi terbaru di lokasi."
+                "Halo Ketua RW {$laporan->rw_kelurahan}, kami dari Kecamatan Bojongsoang menerima laporan banjir. Mohon segera memberikan update kondisi terbaru di lokasi."
             );
 
             $linkWa = "https://wa.me/{$nomorWa}?text={$pesanWa}";
@@ -203,5 +219,42 @@ class DashboardController extends Controller
 
         // Kembalikan ke view lengkap dengan variabel pendukung WhatsApp agar tidak eror undefined
         return view('kecamatan.detail_laporan', compact('laporan', 'rekomendasi_ai', 'nomorWa', 'linkWa'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 🔥 FUNGSI BARU: Nampilin Foto dari Folder Private
+    |--------------------------------------------------------------------------
+    */
+     public function showFoto($filename)
+    {
+        // 1. Cek kemungkinan path di folder private (Laravel 11 standard)
+        $pathPrivate = storage_path('app/private/laporan_banjir/' . $filename);
+        
+        // 2. Cek juga kemungkinan path di folder public (jaga-jaga kalau tersimpan di public)
+        $pathPublic = storage_path('app/public/laporan_banjir/' . $filename);
+
+        // Tentukan path mana yang benar-benar memuat file fisik gambar
+        if (file_exists($pathPrivate)) {
+            $path = $pathPrivate;
+        } elseif (file_exists($pathPublic)) {
+            $path = $pathPublic;
+        } else {
+            // JIKA TIDAK KETEMU: Jangan abort(404) biasa. Kembalikan teks info biar gampang di-debug
+            return response()->json([
+                'error' => 'File gambar tidak ditemukan di server.',
+                'path_private_yang_dicari' => $pathPrivate,
+                'path_public_yang_dicari' => $pathPublic,
+            ], 404);
+        }
+
+        // 3. Ambil Mime Type gambar secara aman (misal: image/png, image/jpeg)
+        $mimeType = mime_content_type($path);
+
+        // 4. Alirkan file dengan Header Content-Type yang dipaksa agar browser tahu ini gambar
+        return response()->file($path, [
+            'Content-Type' => $mimeType,
+            'Cache-Control' => 'no-cache, must-revalidate'
+        ]);
     }
 }

@@ -20,7 +20,7 @@
         <div>
             <div class="p-6 flex items-center gap-3">
                 <div class="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-white">
-                    <img src="{{ url('/kecamatan/laporan/foto/logo.png') }}" alt="Logo SiEval DSS" class="w-full h-full object-cover">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo SiEval DSS" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h1 class="text-base font-bold text-slate-900 leading-tight">SiEval DSS</h1>
@@ -81,17 +81,17 @@
                     if ($score >= 85) {
                         $warnaBg = 'bg-red-600';
                         $warnaText = 'text-red-100';
-                        $label = 'KRITIS';
+                        $label = 'PARAH';
                         $pesan = 'Permintaan penjemputan darurat BPBD pusat.';
                     } elseif ($score >= 70) {
                         $warnaBg = 'bg-orange-500';
                         $warnaText = 'text-orange-100';
-                        $label = 'DARURAT';
+                        $label = 'SEDANG';
                         $pesan = 'Evakuasi warga prioritas sedang berlangsung.';
                     } else {
-                        $warnaBg = 'bg-yellow-500';
-                        $warnaText = 'text-yellow-100';
-                        $label = 'SIAGA';
+                        $warnaBg = 'bg-green-500';
+                        $warnaText = 'text-green-100';
+                        $label = 'RINGAN';
                         $pesan = 'Wilayah membutuhkan pemantauan intensif.';
                     }
 

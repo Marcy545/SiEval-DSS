@@ -78,18 +78,6 @@
 
     <main class="max-w-md mx-auto px-4 mt-6 space-y-6">
 
-        <div class="bg-[#E02928] text-white p-5 rounded-2xl border border-white/20 shadow-md text-center space-y-3">
-            <div class="flex items-center justify-center gap-2 font-semibold">
-                <i data-lucide="phone-call" class="w-5 h-5 animate-pulse"></i>
-                <span class="text-base">Penyelamatan Segera</span>
-            </div>
-            <p class="text-xs text-white/90 leading-relaxed">
-                Kedaruratan yang mengancam jiwa? Ketuk tombol di bawah untuk menghubungi pusat pengiriman logistik/evakuasi secara instan.
-            </p>
-            <a href="tel:112" class="block w-full bg-white text-[#BB0112] py-3 rounded-full font-bold text-sm transition active:scale-95 shadow-md">
-                Panggilan Darurat (112)
-            </a>
-        </div>
 
         <div class="space-y-1">
             <h2 class="text-2xl font-bold tracking-tight text-[#0B1C30]">Laporan Banjir Warga</h2>

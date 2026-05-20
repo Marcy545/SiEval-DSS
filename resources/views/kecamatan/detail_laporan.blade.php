@@ -56,7 +56,7 @@
 
                 <p class="text-xs text-slate-500 leading-relaxed font-medium px-2">
                     @if($laporan->priority_score >= 75)
-                        Status Kritis: Dibutuhkan intervensi taktis dan evakuasi segera dalam kurun waktu 6 jam ke depan.
+                        Status Kritis: Dibutuhkan intervensi taktis dan evakuasi segera.
                     @elseif($laporan->priority_score >= 50)
                         Status Kesiapsiagaan: Pemantauan logistik dapur umum aktif dan pemeriksaan medis berkala diperlukan.
                     @else
@@ -66,30 +66,36 @@
             </div>
 
             @php
-                // Hitung kontribusi riil dari laporan saat ini berbasis batas alokasi model kriteria SPK
-                $pct_air = ($laporan->ketinggian_air >= 150) ? 20 : round(($laporan->ketinggian_air / 150) * 20);
+                // ====================================================================
+                // 🧠 SINKRONISASI LOGIKA PEMBOBOTAN DARI SUMBER FORM RW (REALISTIS)
+                // ====================================================================
 
-                $total_bangunan = ($laporan->rumah_tergenang ?? 0) + ($laporan->toko_terdampak ?? 0);
-                $pct_material = $total_bangunan >= 50 ? 30 : round(($total_bangunan / 50) * 30);
-                if ($laporan->fasum_terdampak) { $pct_material = min($pct_material + 5, 30); }
+                // 1. Ketinggian Air (Max 150cm sebagai 100% dari faktor ini)
+                $pct_air = ($laporan->ketinggian_air >= 150) ? 100 : round(($laporan->ketinggian_air / 150) * 100);
 
+                // 2. Kepadatan Penduduk Terdampak (Max 100 KK sebagai 100% dari faktor ini)
+                $pct_kk = ($laporan->jumlah_kk >= 100) ? 100 : round(($laporan->jumlah_kk / 100) * 100);
+
+                // 3. Ancaman Kelompok Rentan (Max 50 Jiwa sebagai 100% dari faktor ini)
                 $total_rentan = ($laporan->jumlah_lansia ?? 0) + ($laporan->jumlah_bayi_bumil ?? 0);
-                $pct_rentan = $total_rentan >= 20 ? 25 : round(($total_rentan / 20) * 25);
+                $pct_rentan = ($total_rentan >= 50) ? 100 : round(($total_rentan / 50) * 100);
 
-                $pct_evakuasi = (strtolower($laporan->butuh_evakuasi) === 'ya' || strtolower($laporan->butuh_evakuasi) === 'ya, mendesak!') ? 15 : 0;
-                $pct_arus = ($laporan->ketinggian_air >= 150) ? 10 : (($laporan->ketinggian_air >= 80) ? 7 : 3);
-                
+                // 4. Skala Kerusakan Fisik/Ekonomi (Max 50 Bangunan sebagai 100% dari faktor ini)
+                $total_bangunan = ($laporan->rumah_tergenang ?? 0) + ($laporan->toko_terdampak ?? 0);
+                $pct_material = ($total_bangunan >= 50) ? 100 : round(($total_bangunan / 50) * 100);
+
+                // 🔥 INI YANG KETINGGALAN: Hitung jumlah Fasum buat grafik balok di bagian bawah
                 $jumlah_fasum = $laporan->fasum_terdampak ? count(explode(',', $laporan->fasum_terdampak)) : 0;
             @endphp
             
             <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
-                <h3 class="text-base font-bold text-slate-900 tracking-tight">Faktor Penentu Skor (Bobot AI)</h3>
+                <h3 class="text-base font-bold text-slate-900 tracking-tight">Faktor Penentu Skor</h3>
                 
                 <div class="space-y-4 flex-1 flex flex-col justify-center">
                     
                     <div class="space-y-1 w-full pb-2 border-b border-slate-50">
                         <div class="flex justify-between text-xs font-semibold items-center">
-                            <span class="text-slate-600 font-medium">Kerugian Material & Ekonomi</span>
+                            <span class="text-slate-600 font-medium">Skala Kerusakan Fisik & Ekonomi</span>
                             <span class="text-red-600 font-bold font-mono text-sm">{{ $pct_material }}%</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
@@ -101,7 +107,7 @@
                         
                         <div class="space-y-1">
                             <div class="flex justify-between text-xs font-semibold items-center">
-                                <span class="text-slate-600 font-medium">Kelompok Rentan</span>
+                                <span class="text-slate-600 font-medium">Ancaman Kelompok Rentan</span>
                                 <span class="text-slate-900 font-bold font-mono">{{ $pct_rentan }}%</span>
                             </div>
                             <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -111,7 +117,7 @@
 
                         <div class="space-y-1">
                             <div class="flex justify-between text-xs font-semibold items-center">
-                                <span class="text-slate-600 font-medium">Tinggi Air Terkini</span>
+                                <span class="text-slate-600 font-medium">Tinggi Genangan Air Terkini</span>
                                 <span class="text-slate-900 font-bold font-mono">{{ $pct_air }}%</span>
                             </div>
                             <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -121,31 +127,21 @@
 
                         <div class="space-y-1">
                             <div class="flex justify-between text-xs font-semibold items-center">
-                                <span class="text-slate-600 font-medium">Historis Wilayah</span>
-                                <span class="text-slate-900 font-bold font-mono">{{ $pct_evakuasi }}%</span>
+                                <span class="text-slate-600 font-medium">Kepadatan KK Terdampak</span>
+                                <span class="text-slate-900 font-bold font-mono">{{ $pct_kk }}%</span>
                             </div>
                             <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                <div class="bg-slate-800 h-full rounded-full transition-all duration-500" style="width: {{ $pct_evakuasi }}%"></div>
+                                <div class="bg-slate-800 h-full rounded-full transition-all duration-500" style="width: {{ $pct_kk }}%"></div>
                             </div>
                         </div>
 
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-xs font-semibold items-center">
-                                <span class="text-slate-600 font-medium">Kecepatan Arus</span>
-                                <span class="text-slate-900 font-bold font-mono">{{ $pct_arus }}%</span>
-                            </div>
-                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                <div class="bg-slate-800 h-full rounded-full transition-all duration-500" style="width: {{ $pct_arus }}%"></div>
-                            </div>
-                        </div>
-                        
                     </div>
 
                 </div>
             </div>
 
             <div class="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between h-full">
-                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2">Rumah dan Facilities Terdampak</h3>
+                <h3 class="text-base font-bold text-slate-900 tracking-tight">Rumah dan Fasilitas Terdampak</h3>
                 
                 <div class="flex items-end justify-around gap-4 h-36 bg-slate-50/50 p-4 rounded-xl border border-slate-100 shadow-inner">
                     <div class="flex flex-col items-center flex-1 group">
@@ -250,7 +246,7 @@
 
                 <div class="flex items-center gap-2 border-b border-white/10 pb-3">
                     <i data-lucide="bot" class="w-6 h-6 text-blue-400"></i>
-                    <h3 class="text-base font-bold tracking-tight">Rekomendasi Bantuan (Analisis AI)</h3>
+                    <h3 class="text-base font-bold tracking-tight">Rekomendasi Bantuan</h3>
                 </div>
 
                 <div class="space-y-3 flex-1 text-xs text-slate-300 leading-relaxed font-medium">

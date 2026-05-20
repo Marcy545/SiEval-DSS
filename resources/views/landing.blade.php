@@ -16,7 +16,7 @@
     <nav class="flex items-center justify-between px-6 md:px-12 py-5 bg-white border-b border-slate-100 sticky top-0 z-50 shadow-sm">
         <div class="flex items-center gap-2.5">
             <div class="w-10 h-10 rounded-full overflow-hidden border border-slate-200 bg-white flex items-center justify-center shrink-0 shadow-sm">
-                <img src="{{ url('/kecamatan/laporan/foto/logo.png') }}" alt="Logo SiEval DSS" class="w-full h-full object-cover">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo SiEval DSS" class="w-full h-full object-cover">
             </div>
             <span class="font-extrabold text-xl tracking-tight text-slate-900">SiEval DSS</span>
         </div>
@@ -159,7 +159,7 @@
             <div class="md:col-span-2 space-y-4">
                 <div class="flex items-center gap-2.5">
                     <div class="w-6 h-6 rounded-full overflow-hidden border border-slate-200 bg-white flex items-center justify-center shrink-0 shadow-sm">
-                        <img src="{{ url('/kecamatan/laporan/foto/logo.png') }}" alt="Logo SiEval DSS" class="w-full h-full object-cover">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo SiEval DSS" class="w-full h-full object-cover">
                     </div>
                     <span class="font-black text-base text-slate-900">SiEval DSS</span>
                 </div>

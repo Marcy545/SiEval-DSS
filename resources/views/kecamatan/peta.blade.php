@@ -30,7 +30,7 @@
         <div>
             <div class="p-6 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full overflow-hidden border border-slate-200 bg-white flex items-center justify-center shrink-0 shadow-sm">
-                    <img src="{{ url('/kecamatan/laporan/foto/logo.png') }}" alt="Logo SiEval DSS" class="w-full h-full object-cover">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo SiEval DSS" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h1 class="text-base font-bold text-slate-900 leading-tight">SiEval DSS</h1>

@@ -20,7 +20,7 @@
         <div>
             <div class="p-6 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full overflow-hidden border border-slate-200 bg-white flex items-center justify-center shrink-0 shadow-sm">
-                    <img src="{{ url('/kecamatan/laporan/foto/logo.png') }}" alt="Logo SiEval DSS" class="w-full h-full object-cover">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo SiEval DSS" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h1 class="text-base font-bold text-slate-900 leading-tight">SiEval DSS</h1>
@@ -77,10 +77,22 @@
             
             <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
                 <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
-                    <h3 class="text-base font-bold text-slate-900 tracking-tight">Zona Rekaman Laporan</h3>
-                    <span class="text-xs font-bold bg-slate-50 border border-slate-200 text-slate-600 px-3 py-1 rounded-full font-mono">
-                        Total: {{ count($laporan_all ?? []) }} Berkas
-                    </span>
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-base font-bold text-slate-900 tracking-tight">Zona Rekaman Laporan</h3>
+                        <span class="text-xs font-bold bg-slate-50 border border-slate-200 text-slate-600 px-3 py-1 rounded-full font-mono">
+                            Total: {{ count($laporan_all ?? []) }} Berkas
+                        </span>
+                    </div>
+                    
+                    <div class="relative inline-block text-left">
+                        <select id="historyFilter" class="text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-700 rounded-lg px-3 py-2 pr-8 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+                            <option value="ALL">Semua Status</option>
+                            <option value="PARAH">Status: PARAH</option>
+                            <option value="SEDANG">Status: SEDANG</option>
+                            <option value="RENDAH">Status: RENDAH</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none"></i>
+                    </div>
                 </div>
                 
                 <div class="overflow-x-auto">
@@ -111,8 +123,8 @@
                                 <td class="px-6 py-5 text-center text-xs text-slate-500 whitespace-nowrap">
                                     {{ $laporan->created_at ? $laporan->created_at->translatedFormat('d F Y, H:i') . ' WIB' : '23 April 2026, 12:00 WIB' }}
                                 </td>
-                                <td class="px-6 py-5 text-center whitespace-nowrap">
-                                    <span class="text-[10px] font-bold tracking-wider px-3 py-1 rounded-full uppercase inline-block
+                                <td class="px-6 py-5 text-center whitespace-nowrap filter-target">
+                                    <span class="status-badge text-[10px] font-bold tracking-wider px-3 py-1 rounded-full uppercase inline-block
                                         {{ ($laporan->priority_score ?? 0) >= 75 ? 'bg-red-50 text-red-500 border border-red-200' : (($laporan->priority_score ?? 0) >= 50 ? 'bg-amber-50 text-amber-500 border border-amber-200' : 'bg-green-50 text-green-600 border border-green-200') }}">
                                         {{ ($laporan->priority_score ?? 0) >= 75 ? 'PARAH' : (($laporan->priority_score ?? 0) >= 50 ? 'SEDANG' : 'RENDAH') }}
                                     </span>
@@ -144,22 +156,33 @@
     <script>
         lucide.createIcons();
 
+        // 🔥 PERUBAHAN JAVASCRIPT: GABUNGIN SEARCH DAN FILTER DROPDOWN
         const searchInput = document.getElementById('historySearch');
+        const filterSelect = document.getElementById('historyFilter');
         const tableRows = document.querySelectorAll('.history-row');
 
-        searchInput.addEventListener('input', function() {
-            const queryText = this.value.toLowerCase().trim();
+        function filterTable() {
+            const searchText = searchInput.value.toLowerCase().trim();
+            const filterValue = filterSelect.value;
 
             tableRows.forEach(row => {
                 const rwName = row.querySelector('.search-target').textContent.toLowerCase();
-                
-                if (rwName.includes(queryText)) {
+                const statusBadge = row.querySelector('.status-badge').textContent.trim();
+
+                const matchesSearch = rwName.includes(searchText);
+                const matchesFilter = (filterValue === 'ALL' || statusBadge === filterValue);
+
+                if (matchesSearch && matchesFilter) {
                     row.style.display = ''; 
                 } else {
                     row.style.display = 'none'; 
                 }
             });
-        });
+        }
+
+        // Panggil fungsi yang sama saat ngetik di searchbar ATAU milih dropdown
+        searchInput.addEventListener('input', filterTable);
+        filterSelect.addEventListener('change', filterTable);
     </script>
 </body>
 </html>

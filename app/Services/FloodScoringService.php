@@ -6,22 +6,37 @@ class FloodScoringService
 {
     public static function calculateScore($laporan)
     {
+        // 🚨 OVERRIDE MUTLAK (Jalur Bypass)
+        // Jika air >= 150 cm (1.5 meter), langsung tembak Skor 100 (PARAH).
+        if ($laporan->ketinggian_air >= 150) {
+            return 100;
+        }
+
         $score = 0;
 
-        if ($laporan->butuh_evakuasi === 'Ya, Mendesak!') $score += 35;
-        
-        if ($laporan->ketinggian_air >= 150) $score += 25;
-        elseif ($laporan->ketinggian_air >= 100) $score += 15;
-        elseif ($laporan->ketinggian_air > 0) $score += 5;
+        // 1. Ketinggian Air (Paling Krusial) -> Maksimal 40 Poin
+        if ($laporan->ketinggian_air >= 100) $score += 40;      // 100-149 cm (Sedada) otomatis dapet poin gede
+        elseif ($laporan->ketinggian_air >= 50) $score += 25;   // Selutut/Paha
+        elseif ($laporan->ketinggian_air > 0) $score += 10;      // Genangan ringan
 
+        // 2. Urgensi Evakuasi -> Maksimal 25 Poin
+        if (strtolower($laporan->butuh_evakuasi) === 'ya, mendesak!') $score += 25;
+        elseif (strtolower($laporan->butuh_evakuasi) === 'ya') $score += 15;
+
+        // 3. Kepadatan KK Terdampak (YANG SEBELUMNYA HILANG) -> Maksimal 15 Poin
+        $kk = $laporan->jumlah_kk ?? 0;
+        if ($kk >= 50) $score += 15;
+        elseif ($kk >= 20) $score += 10;
+        elseif ($kk > 0) $score += 5;
+
+        // 4. Kelompok Rentan (Lansia + Bayi) -> Maksimal 10 Poin
         $rentan = ($laporan->jumlah_lansia ?? 0) + ($laporan->jumlah_bayi_bumil ?? 0);
-        if ($rentan > 50) $score += 20;
-        elseif ($rentan > 20) $score += 10;
+        if ($rentan >= 20) $score += 10;
         elseif ($rentan > 0) $score += 5;
 
-        if ($laporan->tingkat_keparahan === 'Parah') $score += 20;
-        elseif ($laporan->tingkat_keparahan === 'Sedang') $score += 10;
-        else $score += 5;
+        // 5. Tingkat Keparahan Laporan RW -> Maksimal 10 Poin
+        if (strtolower($laporan->tingkat_keparahan) === 'parah') $score += 10;
+        elseif (strtolower($laporan->tingkat_keparahan) === 'sedang') $score += 5;
 
         return min($score, 100);
     }
