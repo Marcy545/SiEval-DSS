@@ -9,104 +9,113 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function showRegister(Request $request)
+    /*
+    |--------------------------------------------------------------------------
+    | REGISTER ACTIONS (HANYA UNTUK KETUA RW)
+    |--------------------------------------------------------------------------
+    */
+    
+    public function showRegister()
     {
-        // Menangkap parameter ?role= dari URL (default ke 'warga')
-        $role = $request->query('role', 'warga');
-        return view('auth.register', compact('role'));
+        return view('auth.register', ['role' => 'rw']);
     }
 
     public function register(Request $request)
     {
-        // Validasi dinamis berdasarkan role yang dipilih
         $request->validate([
-            'role' => 'required|in:warga,rw',
-            'name' => 'required_if:role,warga',
-            'rw_desa' => 'required_if:role,rw',
-            'email' => 'required|email|unique:users,email',
+            'rw_desa'  => 'required|string',
+            'email'    => 'required|email|unique:users,email',
             'password' => 'required|digits:6',
         ], [
-            'name.required_if' => 'Nama lengkap wajib diisi.',
-            'rw_desa.required_if' => 'Nama RW dan Desa wajib diisi.',
-            'email.required' => 'Email wajib diisi.',
-            'email.unique' => 'Email sudah digunakan.',
-            'password.digits' => 'Password harus 6 digit angka.',
+            'rw_desa.required'  => 'Nama lengkap RW & Desa wajib diisi.',
+            'email.required'    => 'Email wajib diisi.',
+            'email.unique'      => 'Email sudah digunakan.',
+            'password.digits'   => 'Password harus 6 digit angka.',
         ]);
 
-        // Simpan data dengan logika: jika RW, maka name diisi dengan nilai rw_desa
         User::create([
-        'name' => $request->role === 'warga' ? $request->name : $request->rw_desa,
-        'rw_desa' => $request->role === 'rw' ? $request->rw_desa : null,
-        'role' => $request->role,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
+            'name'     => $request->rw_desa,
+            'rw_desa'  => $request->rw_desa,
+            'role'     => 'rw',
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
         ]);
 
-        // Redirect ke login dengan parameter role agar UI login otomatis menyesuaikan
-        return redirect()->route('login', ['role' => $request->role])
-        ->with('success', 'Registrasi berhasil, silakan login sebagai ' . ($request->role === 'rw' ? 'Kecamatan' : 'Warga'));
+        return redirect()->route('login', ['role' => 'rw'])
+            ->with('success', 'Registrasi RW berhasil! Silakan login.');
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOGIN ACTIONS (BISA RW, BISA KECAMATAN)
+    |--------------------------------------------------------------------------
+    */
 
     public function showLogin(Request $request)
     {
-        $role = $request->query('role', 'warga');
+        $role = $request->query('role', 'rw');
         return view('auth.login', compact('role'));
     }
 
-// app/Http/Controllers/AuthController.php
-
     public function login(Request $request)
     {
-        // 1. Validasi input email dan password
+        // 1. Validasi Input Form
         $credentials = $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required',
         ]);
 
-        // Ambil parameter role dari hidden input atau URL (?role=)
         $loginAs = $request->query('role', $request->input('role'));
+        
+        // 2. Tangkap status checkbox 'Remember Me'
+        $remember = $request->has('remember'); 
 
-        // 2. Coba autentikasi email & password
-        if (Auth::attempt($credentials)) {
+        // 3. Proses Autentikasi Utama
+        if (Auth::attempt($credentials, $remember)) {
+            
             $user = Auth::user();
 
-            // 3. VALIDASI CROSS-ROLE: Cek apakah role akun cocok dengan pintu login
+            // 4. Proteksi Cross-Role (Mencegah RW masuk portal Kecamatan & sebaliknya)
             if ($loginAs && $user->role !== $loginAs) {
-                // Jika tidak cocok, paksa logout dan kembalikan ke login dengan pesan error
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
-                $targetLabel = $loginAs === 'rw' ? 'Kecamatan' : 'Warga';
+                $targetLabel = $loginAs === 'rw' ? 'Ketua RW' : 'Kecamatan';
                 return redirect()->route('login', ['role' => $loginAs])
-                    ->with('error', "Akun Anda tidak terdaftar sebagai $targetLabel. Silakan gunakan pintu login yang sesuai.");
+                    ->with('error', "Akun Anda tidak terdaftar sebagai $targetLabel.");
             }
 
-            // 4. Jika cocok, regenerasi session dan arahkan ke dashboard masing-masing
+            // 5. Regenerasi session dilakukan setelah proteksi role aman
             $request->session()->regenerate();
 
-            if ($user->role === 'rw') {
-                return redirect()->intended('/dashboard');
+            // 6. Pengalihan rute menggunakan Route Name absolut sesuai role
+            if ($user->role === 'kecamatan') {
+                return redirect()->route('kecamatan.dashboard');
             }
             
-            return redirect()->intended('/peta-banjir');
+            // --- PERUBAHAN DI SINI ---
+            // Jika role adalah 'rw', redirect dialihkan langsung ke form laporan warga
+            return redirect()->route('rw.laporan.create');
         }
 
-        // Jika email/password salah
         return back()->with('error', 'Email atau password salah!');
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | LOGOUT ACTION
+    |--------------------------------------------------------------------------
+    */
+
     public function logout(Request $request)
     {
-        // 1. Simpan role ke variabel sebelum logout
-        $role = auth()->user()->role; 
+        $role = Auth::check() ? Auth::user()->role : 'rw'; 
 
-        auth()->logout();
-
+        Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // 2. Redirect ke route login dengan parameter role
         return redirect()->route('login', ['role' => $role]);
     }
 }

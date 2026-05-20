@@ -6,40 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-<<<<<<< HEAD
-    /**
-     * Run the migrations.
-     */
-=======
->>>>>>> master
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-
             $table->id();
-
-            $table->string('rw_desa');
+            
+            // Kolom nama (berisi Nama RW atau Nama Instansi Kecamatan)
+            $table->string('name');
+            
+            // Role menggunakan nama asli agar tidak bingung (default ke 'rw')
+            $table->enum('role', ['rw', 'kecamatan'])->default('rw');
+            
+            // Wajib untuk RW, kosong untuk Kecamatan
+            $table->string('rw_desa')->nullable();
 
             $table->string('email')->unique();
-
             $table->string('password');
-
             $table->rememberToken();
-
             $table->timestamps();
-<<<<<<< HEAD
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-=======
-
-        });
-    }
-
->>>>>>> master
     public function down(): void
     {
         Schema::dropIfExists('users');
