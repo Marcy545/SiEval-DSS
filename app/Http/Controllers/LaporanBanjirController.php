@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LaporanBanjir;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http; 
+use Illuminate\Support\Facades\Log;  
+use Illuminate\Support\Facades\Storage; 
 
 class LaporanBanjirController extends Controller
 {
     // Menampilkan halaman form input laporan banjir warga
     public function create()
     {
-        // Mengambil data role user yang sedang login untuk layout header
         $role = Auth::check() ? Auth::user()->role : 'rw';
         return view('warga.form_laporan', compact('role'));
     }
@@ -19,9 +21,8 @@ class LaporanBanjirController extends Controller
     // Memproses penyimpanan data form ke database
     public function store(Request $request)
     {
-        // 1. Validasi Input Form secara ketat
+        // 1. Validasi Input Form secara ketat (rw_kelurahan dihapus karena kita ambil via session Auth)
         $request->validate([
-            'rw_kelurahan'       => 'required|string|max:255',
             'status_banjir'      => 'required|string',
             'ketinggian_air'     => 'required|numeric|min:0',
             'durasi_banjir'      => 'required|string',
@@ -57,37 +58,47 @@ class LaporanBanjirController extends Controller
         // 🔥 LOGIKA INTEGRASI DECISION SUPPORT SYSTEM (DSS) SCORING
         // =====================================================================
         
-        // Parameter 1: Ketinggian Air (Bobot Maksimal: 40 Poin)
-        // Aturan: Tinggi air >= 150cm otomatis dapat 40 poin maksimal. Jika dibawahnya, proporsional.
         $score_air = ($request->ketinggian_air >= 150) ? 40 : (($request->ketinggian_air / 150) * 40);
-
-        // Parameter 2: Dampak Kepadatan KK Terdampak (Bobot Maksimal: 30 Poin)
-        // Aturan: Jika KK terdampak >= 100 KK, dapat 30 poin maksimal.
         $score_kk = ($request->jumlah_kk >= 100) ? 30 : (($request->jumlah_kk / 100) * 30);
-
-        // Parameter 3: Urgensi Kebutuhan Evakuasi Warga (Bobot Maksimal: 20 Poin)
-        // Aturan: Jika form RW memilih "Ya", langsung tambah beban krisis 20 poin.
         $score_evakuasi = (strtolower($request->butuh_evakuasi) === 'ya') ? 20 : 0;
-
-        // Parameter 4: Dampak Kelumpuhan Fasilitas Umum (Bobot Maksimal: 10 Poin)
-        // Aturan: Jika kolom fasum diisi teks (ada fasum tergenang), berikan 10 poin krisis tambahan.
+        
         $score_fasum = 0;
         if (!empty($request->fasum_terdampak)) {
-            // Pecah koma untuk menghitung berapa banyak fasilitas umum yang lumpuh
             $jumlah_fasum = count(explode(',', $request->fasum_terdampak));
             $score_fasum = ($jumlah_fasum >= 2) ? 10 : 5;
         }
 
-        // Akumulasikan seluruh variabel pembobotan menjadi nilai persentase final (Max 100)
         $total_priority_score = round($score_air + $score_kk + $score_evakuasi + $score_fasum);
         if ($total_priority_score > 100) { $total_priority_score = 100; }
 
+        // ====================================================================
+        // 🧠 AI ANOMALY DETECTION INTEGRATION (FASTAPI PYTHON)
+        // ====================================================================
+        $isAnomaly = false; 
+        
+        try {
+            $aiResponse = Http::timeout(5)->post('http://127.0.0.1:8001/predict_anomaly', [
+                'ketinggian_air'  => (int) $request->ketinggian_air,
+                'jumlah_kk'       => (int) $request->jumlah_kk,
+                'jumlah_jiwa'     => (int) $request->jumlah_jiwa,
+                'jumlah_lansia'   => (int) ($request->jumlah_lansia ?? 0),
+                'jumlah_bayi'     => (int) ($request->jumlah_bayi_bumil ?? 0),
+                'rumah_tergenang' => (int) ($request->rumah_tergenang ?? 0),
+            ]);
+
+            if ($aiResponse->successful()) {
+                $isAnomaly = $aiResponse->json('is_anomaly');
+            }
+        } catch (\Exception $e) {
+            Log::error('AI Anomaly API Error: ' . $e->getMessage());
+        }
+
         // =====================================================================
 
-        // 3. Masukkan Seluruh Data ke Database (Termasuk Kolom Skor Hasil Perhitungan)
+        // 3. Masukkan Seluruh Data ke Database (rw_kelurahan otomatis mengunci nama user login)
         LaporanBanjir::create([
             'user_id'           => Auth::id(), 
-            'rw_kelurahan'      => $request->rw_kelurahan,
+            'rw_kelurahan'      => Auth::user()->name, // 🔥 AUTO LOCK DARI NAMA AKUN REGISTRASI
             'status_banjir'     => $request->status_banjir,
             'ketinggian_air'    => $request->ketinggian_air,
             'durasi_banjir'     => $request->durasi_banjir,
@@ -105,11 +116,63 @@ class LaporanBanjirController extends Controller
             'longitude'         => $request->longitude,
             'dokumentasi'       => $fotoSaved,
             
-            // ⚠️ PASTIKAN nama properti ini sesuai dengan nama kolom priority score di database kamu!
-            'priority_score'    => $total_priority_score 
+            'priority_score'    => $total_priority_score,
+            'is_anomaly'        => $isAnomaly 
         ]);
 
-        // 4. Redirect kembali dengan Flash Message sukses
         return redirect()->back()->with('success', 'Laporan banjir berhasil dikirim dan dianalisis oleh AI Kecamatan Bojongsoang!');
+    }
+
+    // =====================================================================
+    // 🔥 FUNGSI HAPUS LAPORAN (HARD DELETE)
+    // =====================================================================
+
+    // 1. Fungsi Hapus Satuan
+    public function hapus($id)
+    {
+        $laporan = LaporanBanjir::findOrFail($id);
+
+        // Hapus fisik foto dokumentasi dari server jika ada
+        if (!empty($laporan->dokumentasi)) {
+            foreach ($laporan->dokumentasi as $foto) {
+                Storage::delete('laporan_banjir/' . $foto);
+            }
+        }
+
+        // Hapus data dari MySQL secara permanen
+        $laporan->delete();
+
+        return redirect()->back()->with('success', 'Laporan berhasil dihapus secara permanen dari sistem!');
+    }
+
+    // 2. Fungsi Pembersihan Berkala (Hapus Massal)
+    public function hapusBerkala(Request $request)
+    {
+        // Validasi input bulan dan tahun
+        $request->validate([
+            'bulan' => 'required|numeric|between:1,12',
+            'tahun' => 'required|numeric',
+        ]);
+
+        // Cari semua laporan yang cocok dengan bulan dan tahun pilihan
+        $laporans = LaporanBanjir::whereYear('created_at', $request->tahun)
+                                 ->whereMonth('created_at', $request->bulan)
+                                 ->get();
+
+        if ($laporans->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ditemukan data laporan pada periode bulan dan tahun tersebut.');
+        }
+
+        // Loop untuk menghapus foto dan baris data masing-masing laporan
+        foreach ($laporans as $laporan) {
+            if (!empty($laporan->dokumentasi)) {
+                foreach ($laporan->dokumentasi as $foto) {
+                    Storage::delete('laporan_banjir/' . $foto);
+                }
+            }
+            $laporan->delete();
+        }
+
+        return redirect()->back()->with('success', 'Pembersihan berkala sukses! Semua data laporan pada periode tersebut telah dihapus.');
     }
 }

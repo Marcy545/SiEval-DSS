@@ -15,31 +15,40 @@ class PetaBanjirController extends Controller
     {
         // TIDAK PERLU Cek Auth::user()->role lagi di sini, sudah dijaga oleh Middleware!
         
-        $rwData = $this->getFloodData();
-
         // Mengarah ke resources/views/warga/peta.blade.php sesuai screenshot folder kamu
-        return view('warga.peta', compact('rwData'));
+        return view('warga.peta');
     }
 
     // Portal Peta untuk Camat / Kecamatan
-    public function indexCamat()
+    public function indexCamat(Request $request)
     {
-        // Ambil semua laporan yang memiliki titik koordinat valid
-        $laporan_banjir = LaporanBanjir::whereNotNull('latitude')
-                            ->whereNotNull('longitude')
-                            ->get();
+        // Mulai kueri awal: Ambil semua laporan yang memiliki titik koordinat valid
+        $query = LaporanBanjir::whereNotNull('latitude')
+                              ->whereNotNull('longitude');
+
+        // =========================================================
+        // 🔥 LOGIKA FILTERING TANGGAL, BULAN, DAN TAHUN
+        // =========================================================
+        
+        // 1. Filter Tanggal / Hari (1 - 31)
+        if ($request->filled('tanggal') && $request->tanggal !== 'all') {
+            $query->whereDay('created_at', $request->tanggal);
+        }
+
+        // 2. Filter Bulan (1 - 12)
+        if ($request->filled('bulan') && $request->bulan !== 'all') {
+            $query->whereMonth('created_at', $request->bulan);
+        }
+
+        // 3. Filter Tahun (2025, 2026, dst)
+        if ($request->filled('tahun') && $request->tahun !== 'all') {
+            $query->whereYear('created_at', $request->tahun);
+        }
+
+        // Eksekusi Kueri
+        $laporan_banjir = $query->get();
 
         // Oper data laporan ke file tampilan blade (Heatmap Map)
         return view('kecamatan.peta', compact('laporan_banjir'));
-    }
-
-    // Data Dummy Laporan Banjir Bojongsoang
-    private function getFloodData()
-    {
-        return [
-            ['id' => '07', 'nama' => 'Cipagalo', 'status' => 'PARAH', 'kk' => 120, 'tinggi' => 180, 'color' => 'red'],
-            ['id' => '12', 'nama' => 'Lengkong', 'status' => 'PARAH', 'kk' => 120, 'tinggi' => 130, 'color' => 'red'],
-            ['id' => '13', 'nama' => 'Bojongsari', 'status' => 'SEDANG', 'kk' => 120, 'tinggi' => 80, 'color' => 'orange'],
-        ];
     }
 }

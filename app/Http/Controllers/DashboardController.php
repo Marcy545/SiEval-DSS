@@ -15,18 +15,20 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         | TOTAL KK
         |--------------------------------------------------------------------------
+        |
         */
 
         $total_kk = LaporanBanjir::sum('jumlah_kk');
 
         /*
         |--------------------------------------------------------------------------
-        | RW MELAPOR
+        | RW MELAPOR (DIPERBAIKI MENGGUNAKAN USER_ID UNIK BERDASARKAN AKUN)
         |--------------------------------------------------------------------------
+        |
         */
 
-        $rw_melapor = LaporanBanjir::distinct('rw_kelurahan')
-            ->count('rw_kelurahan');
+        $rw_melapor = LaporanBanjir::distinct('user_id')
+            ->count('user_id');
 
         $total_rw = 96;
 
@@ -39,6 +41,7 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         | AMBIL LAPORAN + SCORING
         |--------------------------------------------------------------------------
+        |
         */
 
         $laporan_all = LaporanBanjir::all()->map(function ($laporan) {
@@ -58,6 +61,7 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         | TOTAL KERUGIAN
         |--------------------------------------------------------------------------
+        |
         */
 
         $total_kerugian = 0;
@@ -72,6 +76,7 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         | SEKTOR TERDAMPAK
         |--------------------------------------------------------------------------
+        |
         */
 
         $sum_rumah = LaporanBanjir::sum('rumah_tergenang');
@@ -86,6 +91,7 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         | LIST FASUM
         |--------------------------------------------------------------------------
+        |
         */
 
         $list_fasum = LaporanBanjir::whereNotNull('fasum_terdampak')
@@ -97,6 +103,7 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         | TOP PRIORITAS
         |--------------------------------------------------------------------------
+        |
         */
 
         $laporan_terbaru = $laporan_all
@@ -107,6 +114,7 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         | CHART
         |--------------------------------------------------------------------------
+        |
         */
 
         $chart_ketinggian = $laporan_all
@@ -117,6 +125,7 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         | DARURAT PALING TINGGI
         |--------------------------------------------------------------------------
+        |
         */
 
         $darurat = $laporan_all
@@ -156,13 +165,11 @@ class DashboardController extends Controller
         return view('kecamatan.history', compact('laporan_all', 'darurat'));
     }
 
-
-    
-
     /*
     |--------------------------------------------------------------------------
     | DETAIL LAPORAN BANJIR (DENGAN INTEGRASI WHATSAPP)
     |--------------------------------------------------------------------------
+    |
     */
     public function show($id)
     {
@@ -207,7 +214,7 @@ class DashboardController extends Controller
             } elseif ($laporan->priority_label === 'SEDANG') {
                 $rekomendasi_ai = [
                     'evakuasi' => 'Siagakan tim evakuasi internal kelurahan/kecamatan di sekitar area genangan air untuk memantau pergerakan debit air.',
-                    'rekomendasi' => 'Persiapkan dapur umum mandiri dan pastikan jalur evakuasi bebas hambatan.'
+                    'rekomendasi' => 'Persiapkan dapur umum mandiri and pastikan jalur evakuasi bebas hambatan.'
                 ];
             } else {
                 $rekomendasi_ai = [
@@ -225,8 +232,9 @@ class DashboardController extends Controller
     |--------------------------------------------------------------------------
     | 🔥 FUNGSI BARU: Nampilin Foto dari Folder Private
     |--------------------------------------------------------------------------
+    |
     */
-     public function showFoto($filename)
+    public function showFoto($filename)
     {
         // 1. Cek kemungkinan path di folder private (Laravel 11 standard)
         $pathPrivate = storage_path('app/private/laporan_banjir/' . $filename);

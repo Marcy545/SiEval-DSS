@@ -44,6 +44,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kecamatan/peta-banjir', [PetaBanjirController::class, 'indexCamat'])->name('kecamatan.peta');
         Route::get('/kecamatan/laporan/{id}', [DashboardController::class, 'show'])->name('kecamatan.detail_laporan');
         Route::get('/kecamatan/laporan/foto/{filename}', [DashboardController::class, 'showFoto'])->name('kecamatan.laporan.foto');
+
+        Route::delete('/kecamatan/laporan/hapus-berkala', [LaporanBanjirController::class, 'hapusBerkala'])->name('kecamatan.hapus_berkala');
+        Route::delete('/kecamatan/laporan/{id}/hapus', [LaporanBanjirController::class, 'hapus'])->name('kecamatan.hapus_laporan');
     });
 
     /*

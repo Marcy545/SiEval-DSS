@@ -73,8 +73,60 @@
     <main class="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
         
         <header class="bg-white h-20 px-8 flex items-center justify-between border-b border-slate-200 shrink-0 relative z-20 shadow-sm">
-            <h2 class="text-xl font-bold text-slate-800 tracking-tight">Peta Sebaran Banjir (Heatmap)</h2>
             <div class="flex items-center gap-4">
+                <h2 class="text-xl font-bold text-slate-800 tracking-tight">Peta Sebaran Banjir (Heatmap)</h2>
+                
+                @if(request()->hasAny(['tanggal', 'bulan', 'tahun']) && (request('tanggal') != 'all' || request('bulan') != 'all' || request('tahun') != 'all'))
+                    <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full border border-blue-200">
+                        Filter Aktif: {{ count($laporan_banjir) }} Laporan
+                    </span>
+                @endif
+            </div>
+
+            <div class="flex items-center gap-4">
+                <form action="{{ route('kecamatan.peta') }}" method="GET" class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 mr-2">
+                    <select name="tanggal" class="text-xs font-semibold bg-white border border-slate-200 text-slate-700 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                        <option value="all">Semua Hari</option>
+                        @for($i=1; $i<=31; $i++)
+                            @php $dayFormatted = sprintf('%02d', $i); @endphp
+                            <option value="{{ $dayFormatted }}" {{ request('tanggal') == $dayFormatted ? 'selected' : '' }}>{{ $dayFormatted }}</option>
+                        @endfor
+                    </select>
+                    
+                    <select name="bulan" class="text-xs font-semibold bg-white border border-slate-200 text-slate-700 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                        <option value="all">Semua Bulan</option>
+                        @php 
+                            $bulans = [
+                                '01'=>'Jan', '02'=>'Feb', '03'=>'Mar', '04'=>'Apr', 
+                                '05'=>'Mei', '06'=>'Jun', '07'=>'Jul', '08'=>'Agt', 
+                                '09'=>'Sep', '10'=>'Okt', '11'=>'Nov', '12'=>'Des'
+                            ]; 
+                        @endphp
+                        @foreach($bulans as $num => $nama)
+                            <option value="{{ $num }}" {{ request('bulan') == $num ? 'selected' : '' }}>{{ $nama }}</option>
+                        @endforeach
+                    </select>
+
+                    <select name="tahun" class="text-xs font-semibold bg-white border border-slate-200 text-slate-700 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                        <option value="all">Semua Tahun</option>
+                        @for($y = date('Y') - 1; $y <= date('Y') + 4; $y++)
+                            <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>{{ $y }}</option>
+                        @endfor
+                    </select>
+
+                    <div class="flex items-center gap-1 pl-1">
+                        <button type="submit" class="bg-blue-600 text-white p-1.5 rounded-lg hover:bg-blue-700 transition shadow-sm" title="Terapkan Filter">
+                            <i data-lucide="filter" class="w-4 h-4"></i>
+                        </button>
+                        
+                        @if(request()->hasAny(['tanggal', 'bulan', 'tahun']) && (request('tanggal') != 'all' || request('bulan') != 'all' || request('tahun') != 'all'))
+                            <a href="{{ route('kecamatan.peta') }}" class="bg-slate-200 text-slate-600 p-1.5 rounded-lg hover:bg-slate-300 transition" title="Reset/Hapus Filter">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </a>
+                        @endif
+                    </div>
+                </form>
+
                 <div class="relative hidden lg:block">
                     <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
                     <input type="text" id="mapSearchInput" placeholder="Cari RW atau wilayah..." class="bg-slate-100 border border-slate-200 text-sm rounded-full pl-9 pr-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -124,6 +176,7 @@
                     <div class="p-4 rounded-xl border {{ $bgColor }} shadow-sm flex flex-col justify-between laporan-card" data-rw="{{ strtolower($laporan->rw_kelurahan) }}">
                         <div class="mb-2">
                             <span class="text-sm font-bold text-slate-900 block truncate">{{ $laporan->rw_kelurahan }}</span>
+                            <span class="text-[10px] font-medium text-slate-500">{{ $laporan->created_at->translatedFormat('d M Y') }}</span>
                         </div>
                         
                         <div class="flex items-center justify-between text-xs text-slate-600 mb-3">
@@ -149,7 +202,7 @@
                     @empty
                     <div class="flex flex-col items-center justify-center text-center py-10 opacity-50">
                         <i data-lucide="map-pinned" class="w-10 h-10 text-slate-400 mb-2"></i>
-                        <p class="text-xs font-medium text-slate-500">Tidak ada titik laporan banjir yang aktif di peta.</p>
+                        <p class="text-xs font-medium text-slate-500">Tidak ada titik laporan banjir untuk periode filter ini.</p>
                     </div>
                     @endforelse
                 </div>
@@ -180,7 +233,7 @@
         // 2. Deklarasi Data & Penyimpanan Marker Objek
         const rawLaporanData = {!! json_encode($laporan_banjir) !!};
         const heatPoints = []; 
-        const markerStorage = {}; // Untuk menyimpan instansiasi marker agar bisa difokuskan dari sidebar
+        const markerStorage = {}; 
 
         // 3. Loop Render Titik & Konstruksi Intensitas Kebisingan Panas (Heatmap)
         rawLaporanData.forEach(laporan => {
@@ -233,7 +286,7 @@
                         <span>Urgensi Evakuasi:</span> <span class="font-bold text-slate-700">${laporan.butuh_evakuasi}</span>
                     </p>
                     <div class="pt-2 text-center border-t mt-2">
-                        <a href="/kecamatan/detail-laporan/${laporan.id}" class="text-xs text-blue-600 font-bold hover:underline inline-block">Analisis DSS ➔</a>
+                        <a href="/kecamatan/laporan/${laporan.id}" class="text-xs text-blue-600 font-bold hover:underline inline-block">Analisis DSS ➔</a>
                     </div>
                 </div>
             `;

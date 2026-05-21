@@ -78,7 +78,6 @@
 
     <main class="max-w-md mx-auto px-4 mt-6 space-y-6">
 
-
         <div class="space-y-1">
             <h2 class="text-2xl font-bold tracking-tight text-[#0B1C30]">Laporan Banjir Warga</h2>
             <p class="text-xs text-[#45464D] leading-relaxed">
@@ -122,9 +121,10 @@
                     <label class="text-xs font-bold text-gray-700 block">Nama RW dan Kelurahan <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <i data-lucide="home" class="absolute left-4 top-3.5 w-4 h-4 text-gray-400"></i>
-                        <input type="text" name="rw_kelurahan" placeholder="Contoh: RW 05 - Cipagalo" required
-                            class="w-full bg-white border border-gray-200 rounded-full py-3 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                        <input type="text" name="rw_kelurahan" value="{{ Auth::user()->name }}" readonly required
+                            class="w-full bg-slate-100 border border-gray-200 rounded-full py-3 pl-11 pr-4 text-sm focus:outline-none cursor-not-allowed text-slate-500 font-medium">
                     </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-2">Wilayah terkunci otomatis menyesuaikan profil akun registrasi Anda.</p>
                 </div>
             </div>
 
@@ -294,7 +294,6 @@
     <script>
         lucide.createIcons();
 
-        // 1. Set Koordinat Awal Peta (Bojongsoang, Bandung)
         const defaultLat = -6.9749;
         const defaultLng = 107.6369;
 
@@ -306,18 +305,14 @@
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        // Buat Marker Pin yang Draggable
         const marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
 
-        // Ambil elemen DOM input form koordinat
         const inputLat = document.getElementById('latitude');
         const inputLng = document.getElementById('longitude');
 
-        // Isi data inisial awal ke form
         inputLat.value = defaultLat;
         inputLng.value = defaultLng;
 
-        // --- FITUR KLIK LANGSUNG DI PETA ---
         map.on('click', function(e) {
             const clickedLat = e.latlng.lat;
             const clickedLng = e.latlng.lng;
@@ -328,14 +323,12 @@
             inputLng.value = clickedLng.toFixed(8);
         });
 
-        // Catat posisi jika pin digeser manual
         marker.on('dragend', function (e) {
             const position = marker.getLatLng();
             inputLat.value = position.lat.toFixed(8);
             inputLng.value = position.lng.toFixed(8);
         });
 
-        // --- FITUR LEAFLET FLOATING BUTTON (ANTI-HILANG DI HP) ---
         const gpsControl = L.control({ position: 'bottomright' });
 
         gpsControl.onAdd = function() {
@@ -385,15 +378,13 @@
             }
         }
 
-        // --- FITUR DROPDOWN PROFIL LOGOUT ---
         const profileBtn = document.getElementById('profileDropdownBtn');
         const dropdownMenu = document.getElementById('profileDropdownMenu');
 
         profileBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Mencegah event klik bocor ke background
+            e.stopPropagation(); 
             if (dropdownMenu.classList.contains('hidden')) {
                 dropdownMenu.classList.remove('hidden');
-                // Timeout kecil agar animasi Tailwind (opacity, scale) terlihat mulus
                 setTimeout(() => {
                     dropdownMenu.classList.remove('opacity-0', 'scale-95');
                 }, 10);
@@ -405,7 +396,6 @@
             }
         });
 
-        // Menutup dropdown otomatis ketika pengguna mengklik area luar
         window.addEventListener('click', (e) => {
             if (!dropdownMenu.contains(e.target) && !profileBtn.contains(e.target)) {
                 dropdownMenu.classList.add('opacity-0', 'scale-95');
@@ -415,7 +405,6 @@
             }
         });
 
-        // Image Preview Handler
         function previewImage(input) {
             const container = input.parentElement;
             const preview = container.querySelector('.img-preview');

@@ -74,6 +74,12 @@
 
         <div class="flex-1 overflow-y-auto p-8 space-y-6">
             
+            @if(session('success'))
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-4 text-sm font-medium">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             @if($darurat)
                 @php
                     $score = $darurat->priority_score ?? 0;
@@ -262,14 +268,22 @@
                                 <th class="px-6 py-4 font-semibold text-center whitespace-nowrap">Jumlah KK</th>
                                 <th class="px-6 py-4 font-semibold text-center whitespace-nowrap">Tanggal Kejadian</th>
                                 <th class="px-6 py-4 font-semibold text-center whitespace-nowrap">Status Keparahan</th>
-                                <th class="px-6 py-4 font-semibold text-right whitespace-nowrap">Aキシ</th>
+                                <th class="px-6 py-4 font-semibold text-right whitespace-nowrap">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             @forelse($lSimple_laporan_terbaru ?? $laporan_terbaru as $laporan)
                             <tr class="hover:bg-slate-50/80 transition data-row">
                                 <td class="px-6 py-5 whitespace-nowrap search-target">
-                                    <p class="text-sm font-bold text-slate-900 leading-tight">{{ $laporan->rw_kelurahan }}</p>
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-sm font-bold text-slate-900 leading-tight">{{ $laporan->rw_kelurahan }}</p>
+                                        
+                                        @if($laporan->is_anomaly)
+                                            <span class="bg-red-100 text-red-600 border border-red-200 text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow-sm" title="Peringatan AI: Data input tidak wajar">
+                                                <i data-lucide="siren" class="w-3 h-3"></i> Anomali
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="px-6 py-5 text-center font-bold text-slate-900 text-sm whitespace-nowrap">
                                     {{ $laporan->ketinggian_air }}
@@ -287,9 +301,18 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-5 text-right whitespace-nowrap">
-                                    <a href="{{ route('kecamatan.detail_laporan', $laporan->id) }}" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-full text-xs font-semibold transition shadow-sm inline-block tracking-wide">
-                                        Detail
-                                    </a>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="{{ route('kecamatan.detail_laporan', $laporan->id) }}" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-full text-xs font-semibold transition shadow-sm inline-block tracking-wide">
+                                            Detail
+                                        </a>
+                                        <form action="{{ route('kecamatan.hapus_laporan', $laporan->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data laporan ini secara permanen?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-full transition" title="Hapus">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
@@ -316,7 +339,7 @@
         </div>
     </main>
 
-    {{-- CUSTOM ALERT MODAL POPUP (TAILWIND STYLING) --}}
+    {{-- CUSTOM ALERT MODAL POPUP --}}
     <div id="customAlertModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden z-[110] items-center justify-center p-4 transition-all opacity-0 duration-300" onclick="closeAlertModal()">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform scale-95 transition-all duration-300" onclick="event.stopPropagation()">
             <div class="flex flex-col items-center text-center space-y-4">
